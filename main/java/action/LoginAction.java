@@ -35,13 +35,27 @@ public class LoginAction
 
     public String login()
     {
-        if(loginExecutor.login(userName, password))
+        try
         {
-            return "success";
+
+            if (loginExecutor.login(userName, password))
+            {
+                return "success";
+            }
+
+            else
+            {
+                return "failure";
+            }
+
         }
-        else{
-            return "failure";
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
         }
+
+        return "failure";
     }
 }
 

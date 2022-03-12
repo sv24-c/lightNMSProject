@@ -25,13 +25,21 @@ public class LoginExecutor
 
         list = loginDao.logIn(userName, password);
 
-        Map<String, Object> mapData = list.get(0);
+        //Map<String, Object> mapData = list.get(0);
 
-        String uname = String.valueOf(mapData.get("UserName"));
-        String pass = String.valueOf(mapData.get("Password"));
+        Map<String, Object> mapData = null;
 
         try
         {
+            if (list !=null && list.size() != 0)
+            {
+                mapData = list.get(0);
+            }
+
+            String uname = String.valueOf(mapData.get("UserName"));
+
+            String pass = String.valueOf(mapData.get("Password"));
+
             if(uname.equals(userName) && pass.equals(password))
             {
                return true;

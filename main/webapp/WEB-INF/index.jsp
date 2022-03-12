@@ -1,29 +1,50 @@
 <html>
 <head>
     <title>Login Page</title>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="/css/index-main-style.css">
-    <script type="text/javascript" src="js/loginPage.js"></script>
-    <script src="js/jQueryFile.js"></script>
 
+    <%--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>--%>
+
+    <script type="text/javascript" src="js/loginPage.js"></script>
+    <script src="/js/jQueryFile.js"></script>
+    <script src="/js/discoveryjQuery.js"></script>
+    <script>
+        $(document).ready(function () {
+            discoveryVariable.discoveryFunction();
+        });
+    </script>
 </head>
 <body>
 
 
 
 <div class="icon-bar">
-    <a class="active" href="#"><i class="fa fa-tachometer" aria-hidden="true"> Dashboard</i></a>
-    <a href="#"><i class="fa fa-search"> Discovery</i></a>
+    <a class="active" ><i class="fa fa-tachometer" aria-hidden="true"> Dashboard</i></a>
+    <a id="discovery-a" href="discoveryProcess"><i class="fa fa-search"> Discovery</i></a>
     <a href="#"><i class='fa-thin fa-monitor-waveform'>Monitor</i> </a>
     <a href="#"><i class="fa fa-user" aria-hidden="true"> Profile</i></a>
     <a href="logoutProcess"><i class="fa fa-sign-out" aria-hidden="true"> Logout</i></a>
 
 </div>
-<h2>Hello World!</h2>
 
-NMS Index Page
+<div class="dashboard">
+   Welcome to NMS Dashboard Page
+</div>
+
+<div class="discovery-main-div">
+    <h2>Hello World!</h2>
+
+    NMS Discovery Page
+
+    <button id="add-monitor-btn">Add Monitor</button>
+
+</div>
 
 
-<a href="logoutProcess">LogOut </a>
 </body>
 </html>

@@ -20,6 +20,12 @@
         <action name="logoutProcess">
             <result>login.jsp</result>
         </action>
+
+        <action name="discoveryProcess" class="action.DiscoveryAction" method="discovery">
+            <result name="success">/WEB-INF/index.jsp</result>
+            <result name="failure">login.jsp</result>
+        </action>
+
     </package>
 
 </struts>
