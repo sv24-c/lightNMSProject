@@ -29,6 +29,9 @@ var logInVar = {
 
 };
 
+
+/*
+
 function logIn()
 {
     var userName = $("#userName").val();
@@ -51,4 +54,4 @@ function logIn()
         }
 
     });
-}
+}*/

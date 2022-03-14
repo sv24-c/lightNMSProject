@@ -1,9 +1,10 @@
 package dao;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by smit on 12/3/22.
@@ -113,5 +114,64 @@ public class DiscoveryDao
         {
             closeConnection(preparedStatementOfInsert, con);
         }
+    }
+
+    public List discoveryShowData()
+    {
+        ResultSet resultSet;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+        try
+        {
+            con = makeConnection();
+
+            preparedStatement = con.prepareStatement("SELECT * FROM Discovery");
+
+            System.out.println("Prepared statement created successfully");
+
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next())
+            {
+                Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+                System.out.println("New LinkedHashMap has created ");
+
+                map.put("Name", resultSet.getString(1));
+
+                map.put("IP", resultSet.getString(2));
+
+                map.put("Type", resultSet.getString(3));
+
+                list.add(map);
+
+                System.out.println("Map added to list.");
+
+            }
+
+        }
+
+        catch (SQLException e)
+        {
+
+            System.out.println("SQL State: "+ e.getSQLState());
+
+            System.out.println("Error Code "+ e.getErrorCode());
+
+            System.out.println(e.getMessage());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatement, con);
+        }
+
+        return list;
     }
 }
