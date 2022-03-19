@@ -30,7 +30,26 @@
             <result>login.jsp</result>
         </action>
 
+        <action name="DashboardClick">
+            <result>/WEB-INF/index.jsp</result>
+        </action>
+
         <action name="discoveryProcess" class="action.DiscoveryAction" method="discovery">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
+        <action name="discoveryInsertProcess" class="action.DiscoveryAction" method="discoveryInsert">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
+        <action name="discoveryUpdateProcess" class="action.DiscoveryAction" method="discoveryUpdate">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
+        <action name="discoveryDeleteProcess" class="action.DiscoveryAction" method="discoveryDelete">
             <result name="success" type="json"></result>
             <result name="failure">login.jsp</result>
         </action>
