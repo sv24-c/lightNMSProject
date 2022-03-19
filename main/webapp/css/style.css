@@ -1,4 +1,4 @@
-body{
+/*body{
     background: url(http://www.timurtek.com/wp-content/uploads/2014/10/form-bg.jpg) no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
@@ -6,7 +6,7 @@ body{
     background-size: cover;
     font-family:'HelveticaNeue','Arial', sans-serif;
 
-}
+}*/
 a{color:#58bff6;text-decoration: none;}
 a:hover{color:#aaa; }
 .pull-right{float: right;}

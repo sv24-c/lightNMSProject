@@ -1,4 +1,4 @@
-body {margin:0;}
+/*body {margin:0;}*/
 
 .icon-bar {
     width: 100%;
@@ -20,9 +20,9 @@ body {margin:0;}
     background-color: #000;
 }
 
-.active {
+/*.active {
     background-color: #235788;
-}
+}*/
 
 #discovery-a{
     float: left;
@@ -43,3 +43,4 @@ body {margin:0;}
 .discovery-main-div{
     display: none;
 }*/
+
