@@ -23,27 +23,74 @@ public class DiscoveryExecutor
 
         list = discoveryDao.discoveryShowData();
 
-        Map<String, Object> mapData = null;
-
         try
         {
 
             for (int i = 0; i < list.size(); i++)
             {
-                mapData = list.get(i);
+                DiscoveryBean discovery=new DiscoveryBean();
 
-                discoveryBean.setName((String) mapData.get("Name"));
+               discovery.setName((String) list.get(i).get("Name"));
+               discovery.setIP((String) list.get(i).get("IP"));
+               discovery.setType((String) list.get(i).get("Type"));
+
+                /*discoveryBean.setName((String) mapData.get("Name"));
 
                 discoveryBean.setIP((String) mapData.get("IP"));
 
-                discoveryBean.setType((String) mapData.get("Type"));
+                discoveryBean.setType((String) mapData.get("Type"));*/
 
-                discoveryBeanList.add(discoveryBean);
+                discoveryBeanList.add(discovery);
 
             }
 
             discoveryBean.setDiscoveryBeanList(discoveryBeanList);
 
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public boolean discoveryInsertInDatabase(DiscoveryBean discoveryBean)
+    {
+
+        try
+        {
+            discoveryDao.discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public boolean discoveryUpdateInDatabase(DiscoveryBean discoveryBean)
+    {
+
+        try
+        {
+            discoveryDao.discoveryUpdateData(discoveryBean.getName(), discoveryBean.getIP());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public boolean discoveryDeleteInDatabase(DiscoveryBean discoveryBean)
+    {
+
+        try
+        {
+            discoveryDao.discoveryDeleteData(discoveryBean.getName());
         }
         catch (Exception e)
         {

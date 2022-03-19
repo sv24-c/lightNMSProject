@@ -1,5 +1,7 @@
 package dao;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -70,7 +72,7 @@ public class DiscoveryDao
     }
 
 
-    public void discovery()
+    public String discovery(String Name, String IP, String Type, String username, String password)
     {
         Connection con = null;
 
@@ -80,15 +82,23 @@ public class DiscoveryDao
         {
             con = makeConnection();
 
+            Base64 base64 = new Base64();
+
+            String encodedPassword = new String(base64.encode(password.getBytes()));
+
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("INSERT INTO Discovery VALUES(?,?,?)");
+                preparedStatementOfInsert = con.prepareStatement("INSERT  INTO Discovery VALUES(?,?,?,?,?)");
 
-                preparedStatementOfInsert.setInt(1, 333);
+                preparedStatementOfInsert.setString(1, Name);
 
-                preparedStatementOfInsert.setString(2, "xyzxyz");
+                preparedStatementOfInsert.setString(2, IP);
 
-                preparedStatementOfInsert.setInt(3, 33);
+                preparedStatementOfInsert.setString(3, Type);
+
+                preparedStatementOfInsert.setString(4, username);
+
+                preparedStatementOfInsert.setString(5, encodedPassword);
 
                 int result = preparedStatementOfInsert.executeUpdate();
 
@@ -114,6 +124,8 @@ public class DiscoveryDao
         {
             closeConnection(preparedStatementOfInsert, con);
         }
+
+        return null;
     }
 
     public List discoveryShowData()
@@ -173,5 +185,95 @@ public class DiscoveryDao
         }
 
         return list;
+    }
+
+    public String discoveryUpdateData(String Name, String IP)
+    {
+        Connection con = null;
+
+        PreparedStatement preparedStatementOfInsert = null;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null)
+            {
+                preparedStatementOfInsert = con.prepareStatement("UPDATE Discovery SET Name=?, IP=?)");
+
+                preparedStatementOfInsert.setString(1, Name);
+
+                preparedStatementOfInsert.setString(2, IP);
+
+                int result = preparedStatementOfInsert.executeUpdate();
+
+                System.out.println(result + " record Updated successfully");
+
+            }
+
+            else
+            {
+                System.out.println("Connection not established...");
+            }
+        }
+
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+
+            System.out.println(e.getStackTrace());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatementOfInsert, con);
+        }
+
+        return null;
+    }
+
+    public String discoveryDeleteData(String Name)
+    {
+        Connection con = null;
+
+        PreparedStatement preparedStatementOfInsert = null;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null)
+            {
+                preparedStatementOfInsert = con.prepareStatement("DELETE FROM Discovery WHERE Name=?)");
+
+                preparedStatementOfInsert.setString(1, Name);
+
+                int result = preparedStatementOfInsert.executeUpdate();
+
+                System.out.println(result + " record Deleted successfully");
+
+            }
+
+            else
+            {
+                System.out.println("Connection not established...");
+            }
+        }
+
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+
+            System.out.println(e.getStackTrace());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatementOfInsert, con);
+        }
+
+        return null;
     }
 }

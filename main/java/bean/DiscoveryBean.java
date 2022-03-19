@@ -13,6 +13,8 @@ public class DiscoveryBean
     String Name;
     String IP;
     String Type;
+    String Username;
+    String Password;
 
     List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
 
@@ -28,8 +30,8 @@ public class DiscoveryBean
         return IP;
     }
 
-    public void setIP(String IP) {
-        this.IP = IP;
+    public void setIP(String ip) {
+        this.IP = ip;
     }
 
     public String getType() {
@@ -40,7 +42,21 @@ public class DiscoveryBean
         Type = type;
     }
 
+    public String getUsername() {
+        return Username;
+    }
 
+    public void setUsername(String username) {
+        Username = username;
+    }
+
+    public String getPassword() {
+        return Password;
+    }
+
+    public void setPassword(String password) {
+        Password = password;
+    }
 
     public List<DiscoveryBean> getDiscoveryBeanList() {
         return discoveryBeanList;
@@ -49,6 +65,4 @@ public class DiscoveryBean
     public void setDiscoveryBeanList(List<DiscoveryBean> discoveryBeanList) {
         this.discoveryBeanList = discoveryBeanList;
     }
-
-
 }
