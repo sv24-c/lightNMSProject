@@ -88,7 +88,7 @@ public class DiscoveryDao
 
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("INSERT  INTO Discovery VALUES(?,?,?,?,?)");
+                preparedStatementOfInsert = con.prepareStatement("INSERT INTO Discovery (Name, IP, Type, Username, Password) VALUES(?,?,?,?,?)");
 
                 preparedStatementOfInsert.setString(1, Name);
 
@@ -110,6 +110,7 @@ public class DiscoveryDao
             {
                 System.out.println("Connection not established...");
             }
+
         }
 
         catch (Exception e)
@@ -122,7 +123,7 @@ public class DiscoveryDao
 
         finally
         {
-            closeConnection(preparedStatementOfInsert, con);
+             closeConnection(preparedStatementOfInsert, con);
         }
 
         return null;
@@ -142,28 +143,38 @@ public class DiscoveryDao
         {
             con = makeConnection();
 
-            preparedStatement = con.prepareStatement("SELECT * FROM Discovery");
+            if ( con != null) {
 
-            System.out.println("Prepared statement created successfully");
+                preparedStatement = con.prepareStatement("SELECT Id, Name, IP, Type FROM Discovery");
 
-            resultSet = preparedStatement.executeQuery();
+                System.out.println("Prepared statement created successfully");
 
-            while (resultSet.next())
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+
+                    Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+                    System.out.println("New LinkedHashMap has created ");
+
+                    map.put("Id", resultSet.getInt(1));
+
+                    map.put("Name", resultSet.getString(2));
+
+                    map.put("IP", resultSet.getString(3));
+
+                    map.put("Type", resultSet.getString(4));
+
+                    list.add(map);
+
+                    System.out.println("Map added to list.");
+
+                }
+            }
+
+            else
             {
-                Map<String, Object> map = new LinkedHashMap<String, Object>();
-
-                System.out.println("New LinkedHashMap has created ");
-
-                map.put("Name", resultSet.getString(1));
-
-                map.put("IP", resultSet.getString(2));
-
-                map.put("Type", resultSet.getString(3));
-
-                list.add(map);
-
-                System.out.println("Map added to list.");
-
+                System.out.println("Connection is not established");
             }
 
         }
@@ -187,11 +198,66 @@ public class DiscoveryDao
         return list;
     }
 
-    public String discoveryUpdateData(String Name, String IP)
+    public String discoveryGetUsernameDaoData()
+    {
+        String uname="";
+
+        ResultSet resultSet;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null) {
+
+                preparedStatement = con.prepareStatement("SELECT Username FROM Discovery");
+
+                System.out.println("Prepared statement created successfully");
+
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+
+                    uname = resultSet.getString(1);
+
+                }
+            }
+
+            else
+            {
+                System.out.println("Connection is not established");
+            }
+
+        }
+
+        catch (SQLException e)
+        {
+
+            System.out.println("SQL State: "+ e.getSQLState());
+
+            System.out.println("Error Code "+ e.getErrorCode());
+
+            System.out.println(e.getMessage());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatement, con);
+        }
+
+        return uname;
+    }
+
+    public String discoveryUpdateData(String name, String ip, String username, String password, String id)
     {
         Connection con = null;
 
-        PreparedStatement preparedStatementOfInsert = null;
+        PreparedStatement preparedStatementOfUpdate = null;
 
         try
         {
@@ -199,13 +265,23 @@ public class DiscoveryDao
 
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("UPDATE Discovery SET Name=?, IP=?)");
+                Base64 base64 = new Base64();
 
-                preparedStatementOfInsert.setString(1, Name);
+                String encodedPassword = new String(base64.encode(password.getBytes()));
 
-                preparedStatementOfInsert.setString(2, IP);
+                preparedStatementOfUpdate = con.prepareStatement("UPDATE Discovery SET Name=? , IP=? , Username=? , Password=? where Id=?");
 
-                int result = preparedStatementOfInsert.executeUpdate();
+                preparedStatementOfUpdate.setString(1, name);
+
+                preparedStatementOfUpdate.setString(2, ip);
+
+                preparedStatementOfUpdate.setString(3, username);
+
+                preparedStatementOfUpdate.setString(4, encodedPassword);
+
+                preparedStatementOfUpdate.setInt(5, Integer.parseInt(id));
+
+                int result = preparedStatementOfUpdate.executeUpdate();
 
                 System.out.println(result + " record Updated successfully");
 
@@ -227,17 +303,17 @@ public class DiscoveryDao
 
         finally
         {
-            closeConnection(preparedStatementOfInsert, con);
+            closeConnection(preparedStatementOfUpdate, con);
         }
 
         return null;
     }
 
-    public String discoveryDeleteData(String Name)
+    public String discoveryDeleteData(String id)
     {
         Connection con = null;
 
-        PreparedStatement preparedStatementOfInsert = null;
+        PreparedStatement preparedStatementOfDelete = null;
 
         try
         {
@@ -245,11 +321,11 @@ public class DiscoveryDao
 
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("DELETE FROM Discovery WHERE Name=?)");
+                preparedStatementOfDelete = con.prepareStatement("DELETE FROM Discovery WHERE Id = ?");
 
-                preparedStatementOfInsert.setString(1, Name);
+                preparedStatementOfDelete.setInt(1, Integer.parseInt(id));
 
-                int result = preparedStatementOfInsert.executeUpdate();
+                int result = preparedStatementOfDelete.executeUpdate();
 
                 System.out.println(result + " record Deleted successfully");
 
@@ -271,7 +347,7 @@ public class DiscoveryDao
 
         finally
         {
-            closeConnection(preparedStatementOfInsert, con);
+            closeConnection(preparedStatementOfDelete, con);
         }
 
         return null;
