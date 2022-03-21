@@ -17,30 +17,30 @@ public class DiscoveryExecutor
     public boolean discoveryShowData(DiscoveryBean discoveryBean)
     {
 
-        List<Map<String, Object>> list;
-
-        List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
-
-        list = discoveryDao.discoveryShowData();
-
         try
         {
 
+            DiscoveryDao discoveryDao = new DiscoveryDao();
+
+            List<Map<String, Object>> list;
+
+            List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
+
+            list = discoveryDao.discoveryShowData();
+
             for (int i = 0; i < list.size(); i++)
             {
-                DiscoveryBean discovery=new DiscoveryBean();
+                DiscoveryBean discovery = new DiscoveryBean();
+
+               discovery.setId(String.valueOf(list.get(i).get("Id")));
 
                discovery.setName((String) list.get(i).get("Name"));
+
                discovery.setIP((String) list.get(i).get("IP"));
+
                discovery.setType((String) list.get(i).get("Type"));
 
-                /*discoveryBean.setName((String) mapData.get("Name"));
-
-                discoveryBean.setIP((String) mapData.get("IP"));
-
-                discoveryBean.setType((String) mapData.get("Type"));*/
-
-                discoveryBeanList.add(discovery);
+               discoveryBeanList.add(discovery);
 
             }
 
@@ -55,17 +55,39 @@ public class DiscoveryExecutor
         return true;
     }
 
-    public boolean discoveryInsertInDatabase(DiscoveryBean discoveryBean)
+    public boolean discoveryGetUsernameData(DiscoveryBean discoveryBean)
     {
-
         try
         {
-            discoveryDao.discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
+          discoveryBean.setUsername(discoveryDao.discoveryGetUsernameDaoData());
         }
+
         catch (Exception e)
         {
             e.printStackTrace();
         }
+
+        return true;
+    }
+
+    public boolean discoveryInsertInDatabase(DiscoveryBean discoveryBean)
+    {
+        DiscoveryDao discoveryDao = new DiscoveryDao();
+
+        try
+        {
+            discoveryDao.discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
+
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+
+
+
 
         return true;
     }
@@ -75,7 +97,7 @@ public class DiscoveryExecutor
 
         try
         {
-            discoveryDao.discoveryUpdateData(discoveryBean.getName(), discoveryBean.getIP());
+            discoveryDao.discoveryUpdateData(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getUsername(), discoveryBean.getPassword(), discoveryBean.getId());
         }
         catch (Exception e)
         {
@@ -90,7 +112,7 @@ public class DiscoveryExecutor
 
         try
         {
-            discoveryDao.discoveryDeleteData(discoveryBean.getName());
+            discoveryDao.discoveryDeleteData(discoveryBean.getId());
         }
         catch (Exception e)
         {
