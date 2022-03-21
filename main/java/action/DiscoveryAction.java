@@ -10,17 +10,24 @@ import executor.DiscoveryExecutor;
 public class DiscoveryAction implements ModelDriven
 {
 
-    DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
+    DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
     DiscoveryBean discoveryBean = new DiscoveryBean();
 
     public String discovery()
     {
+        DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
 
         try
         {
-
-            discoveryExecutor.discoveryShowData(discoveryBean);
+            if(discoveryExecutor.discoveryShowData(discoveryBean))
+            {
+                return "success";
+            }
+            else
+            {
+                return "failure";
+            }
 
         }
 
@@ -29,35 +36,75 @@ public class DiscoveryAction implements ModelDriven
             e.printStackTrace();
         }
 
-        return "success";
+        return "failure";
+    }
+
+    public String discoveryGetUsername()
+    {
+        DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
+
+        try
+        {
+            if(discoveryExecutor.discoveryGetUsernameData(discoveryBean))
+            {
+                return "success";
+            }
+            else
+            {
+                return "failure";
+            }
+
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return "failure";
     }
 
     public String discoveryInsert()
     {
         try
         {
-            discoveryExecutor.discoveryInsertInDatabase(discoveryBean);
+            if(new DiscoveryExecutor().discoveryInsertInDatabase(discoveryBean))
+            {
+                return "success";
+            }
+
+            else
+            {
+                return "failure";
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return "success";
+        return "failure";
     }
 
     public String discoveryUpdate()
     {
         try
         {
-            discoveryExecutor.discoveryUpdateInDatabase(discoveryBean);
+            if(discoveryExecutor.discoveryUpdateInDatabase(discoveryBean))
+            {
+                return "success";
+            }
+            else
+            {
+                return "failure";
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return "success";
+        return "failure";
     }
 
     public String discoveryDelete()
