@@ -44,12 +44,22 @@
             <result name="failure">login.jsp</result>
         </action>
 
+        <action name="discoveryGetUsernameProcess" class="action.DiscoveryAction" method="discoveryGetUsername">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
         <action name="discoveryUpdateProcess" class="action.DiscoveryAction" method="discoveryUpdate">
             <result name="success" type="json"></result>
             <result name="failure">login.jsp</result>
         </action>
 
         <action name="discoveryDeleteProcess" class="action.DiscoveryAction" method="discoveryDelete">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
+        <action name="monitorProcess" class="action.MonitorAction" method="monitor">
             <result name="success" type="json"></result>
             <result name="failure">login.jsp</result>
         </action>
