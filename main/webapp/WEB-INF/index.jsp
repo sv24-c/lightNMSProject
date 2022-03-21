@@ -305,7 +305,7 @@
                     <div class="collapse" id="ui-basic">
                         <ul class="nav flex-column sub-menu">
                             <li class="nav-item" id="discovery-onclick"> <a class="nav-link" <%--href="pages/ui-features/buttons.html"--%>>Discovery</a></li>
-                            <li class="nav-item"> <a class="nav-link"> <%--href="pages/ui-features/dropdowns.html"--%>Monitor</a></li>
+                            <li class="nav-item" id="monitor-onclick"> <a class="nav-link"> <%--href="pages/ui-features/dropdowns.html"--%>Monitor</a></li>
                         </ul>
                     </div>
                 </li>
