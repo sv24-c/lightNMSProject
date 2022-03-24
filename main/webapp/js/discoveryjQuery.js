@@ -28,7 +28,7 @@ var discoveryVariable = {
                             "<td>" + this.IP + "</td>" +
                             "<td>" + this.type + "</td>" +
                             "<td>"+
-                            "<button onclick='addToMonitor(this);' data-id='"+this.id+"' class='btn btn-sm btn-info' >Add</button>"+
+                            "<button onclick='addToMonitor(this);' data-id='"+this.id+"' class='btn btn-sm btn-info' >Provision</button>"+
                             "<button onclick='deleteUser(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"+
                             "<button onclick='editUser(this);' data-id='"+this.id+"' class='btn btn-sm btn-secondary' id='dis-edit-btn'>Edit</button>"+
                             "</td></tr>";
@@ -46,16 +46,58 @@ var discoveryVariable = {
                 }
             });
 
-
         });
 
     },
 
+    showMonitor : function ()
+    {
+
+        $("#monitor-onclick").on("click", function ()
+        {
+
+            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery table</h4> <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Availability </th> <th> Operation </th></tr> </thead> <tbody id="monitortablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
+
+            $.ajax({
+                type: "GET",
+                url:"monitorShowDataProcess",
+                success: function (data)
+                {
+
+                    var monitorTblData="";
+
+                    $.each(data.monitorBeanList, function() {
+
+                        monitorTblData += "<tr><td>" + this.name + "</td>" +
+                            "<td>" + this.ip + "</td>" +
+                            "<td>" + this.type + "</td>" +
+                            "<td>" + this.availability + "</td>" +
+                            "<td>"+
+                            "<button onclick='show(this);' data-id='"+this.id+"' class='btn btn-sm btn-info' >Show</button>"+
+                            "<button onclick='deleteMonitorUser(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"+
+                            "</td></tr>";
+                    });
+
+                    $("#monitortablebody").html(monitorTblData);
+
+                },
+                error: function ()
+                {
+                    alert("Something went Wrong");
+                }
+            });
+        });
+    }
+
 };
-function discoveryClickButton() {
+
+function discoveryClickButton()
+{
+
     $("#dis-add-btn").on("click", function () {
 
         $("#overview").html(vtwo);
+
         $("#type").on('change', function () {
             if ($(this).val() === "ssh") {
                 $("#adc").show();
@@ -103,7 +145,6 @@ function discoveryClickButton() {
                 }
 
             });
-
         });
     });
 
@@ -128,9 +169,11 @@ function editUser(that) {
 
         $.ajax({
             type: "GET",
+            data: "id="+id,
             url:"discoveryGetUsernameProcess",
             success: function (data)
             {
+                //$("#usernamessh").val(data.username);
                 $("#usernamessh").val(data.username);
             },
             error: function ()
@@ -152,7 +195,7 @@ function editUser(that) {
 
 function updateDis(that) {
 
-    $("#update-btn").on("click", function () {
+    $("#update-btn").on("click", function (){
 
         var name =$("#name").val();
         var ip = $("#ip").val();
@@ -222,23 +265,19 @@ function deleteDis(that)
 
 function addToMonitor(that) {
 
-    var name = $("#name").val($(that).parent().prev().prev().prev().text());
-    var ip = $("#ip").val($(that).parent().prev().prev().text());
-    var type = $("#type:selected").val();
-    $("#usernamessh").val();
-    $("#passwordssh").val();
+    var id = $(that).data("id");
 
     $.ajax({
 
+        data: "id="+id,
         type: "POST",
-        data: "Name="+name+"&IP="+ip+"&Type="+type,
         url: "monitorProcess",
 
         success: function ()
         {
-            alert("Send for monitor Success");
+            alert("Send for monitor ping Success");
 
-            window.history.reload();
+            window.location.reload();
         },
 
         error: function ()
@@ -248,4 +287,41 @@ function addToMonitor(that) {
 
     });
 
+}
+
+function deleteMonitorUser(that) {
+
+    var id = $(that).data("id");
+
+    $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"><div class="card-body">Are You Sure, To Delete this Row? <button type="button" class="btn btn-success btn-block" id="delete-monitor-btn" data-id="'+that.dataset.id+'" onclick="deleteMonitor(this)">Delete</button> </div></div></div>');
+
+}
+
+function deleteMonitor(that)
+{
+    $("#delete-monitor-btn").on("click", function () {
+
+        var id = $(that).data("id");
+
+        $.ajax({
+
+            type: "POST",
+            data: "id="+id,
+            url: "monitorDeleteProcess",
+            success: function ()
+            {
+                $(that).parent().parent().remove();
+
+                alert("Delete Success");
+
+                window.location.reload();
+            },
+
+            error: function ()
+            {
+                alert("Error");
+            }
+
+        });
+    });
 }
