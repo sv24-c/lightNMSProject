@@ -32,7 +32,7 @@ public class DiscoveryExecutor
             {
                 DiscoveryBean discovery = new DiscoveryBean();
 
-               discovery.setId(String.valueOf(list.get(i).get("Id")));
+               discovery.setId((Integer) list.get(i).get("Id"));
 
                discovery.setName((String) list.get(i).get("Name"));
 
@@ -59,7 +59,9 @@ public class DiscoveryExecutor
     {
         try
         {
-          discoveryBean.setUsername(discoveryDao.discoveryGetUsernameDaoData());
+            //new DiscoveryDao().discoveryGetUsernameDaoData(discoveryBean.getId());
+
+          discoveryBean.setUsername(discoveryDao.discoveryGetUsernameDaoData(discoveryBean.getId()));
         }
 
         catch (Exception e)
@@ -76,7 +78,7 @@ public class DiscoveryExecutor
 
         try
         {
-            discoveryDao.discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
+            new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
 
         }
 
@@ -97,7 +99,7 @@ public class DiscoveryExecutor
 
         try
         {
-            discoveryDao.discoveryUpdateData(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getUsername(), discoveryBean.getPassword(), discoveryBean.getId());
+            new DiscoveryDao().discoveryUpdateData(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getUsername(), discoveryBean.getPassword(), discoveryBean.getId());
         }
         catch (Exception e)
         {
@@ -112,7 +114,7 @@ public class DiscoveryExecutor
 
         try
         {
-            discoveryDao.discoveryDeleteData(discoveryBean.getId());
+            new DiscoveryDao().discoveryDeleteData(discoveryBean.getId());
         }
         catch (Exception e)
         {

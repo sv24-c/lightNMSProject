@@ -1,35 +1,82 @@
 package executor;
 
-import bean.DiscoveryBean;
 import bean.MonitorBean;
+import dao.MonitorDao;
+import helper.MonitorHelper;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by smit on 20/3/22.
  */
 public class MonitorExecutor
 {
-    private static MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-    public static boolean monitorPing()
+    MonitorHelper monitorHelper = new MonitorHelper();
+
+    MonitorDao monitorDao = new MonitorDao();
+
+    public boolean monitorPing(MonitorBean monitorBean)
     {
 
         try
         {
-            MonitorBean monitorBean = new MonitorBean();
 
-            List<String> pingcommands = new ArrayList<String>();
+            String name = null;
+            String ip = null;
+            String type = null;
+            String username = null;
+            String password = null;
+            String command = "free";
+            boolean pingresult;
+
+            List<String> pingcommands = new ArrayList<>();
+
+            List<Map<String, Object>> list;
+
+            list = monitorDao.monitorShowData(monitorBean.getId());
+
+            for (int i = 0; i < list.size(); i++)
+            {
+
+                name = (String) list.get(i).get("Name");
+
+                ip   = (String) list.get(i).get("IP");
+
+                type = (String) list.get(i).get("Type");
+
+                username = (String) list.get(i).get("Username");
+
+                password = (String) list.get(i).get("Password");
+            }
 
             pingcommands.add("ping");
             pingcommands.add("-c");
-            pingcommands.add("5");
-            pingcommands.add(monitorBean.getIp());
+            pingcommands.add("5");  
+            pingcommands.add(ip);
 
-            monitorExecutor.ping(pingcommands);
+            pingresult = new MonitorHelper().ping(pingcommands);
+
+            if(pingresult && type.equals("Ping"))
+            {
+                monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+            }
+
+            else if(pingresult && type.equals("SSH"))
+            {
+                if(new MonitorHelper().ssh(username, password, ip, command))
+                {
+                    monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+                }
+                System.out.println("Do ping first then also ssh");
+            }
+
+            else
+            {
+                System.out.println("Make sure type is appropriate");
+            }
 
         }
         catch (Exception e)
@@ -40,39 +87,60 @@ public class MonitorExecutor
         return true;
     }
 
-    public void ping(List<String> pinglist)
+    public boolean monitorShowAllData(MonitorBean monitorBean)
     {
         try
         {
 
-            String s = null;
+            MonitorDao monitorDao = new MonitorDao();
 
-            ProcessBuilder processBuilder = new ProcessBuilder(pinglist);
+            List<Map<String, Object>> list;
 
-            Process process = processBuilder.start();
+            List<MonitorBean> monitorBeanList = new ArrayList<>();
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            list = monitorDao.monitorShowAllData();
 
-            BufferedReader error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
-            while ((s = reader.readLine()) !=null)
+            for (int i = 0; i < list.size(); i++)
             {
-                System.out.println(s);
+                MonitorBean monitorBeanShow = new MonitorBean();
+
+                monitorBeanShow.setId(String.valueOf(list.get(i).get("Id")));
+
+                monitorBeanShow.setName(String.valueOf(list.get(i).get("Name")));
+
+                monitorBeanShow.setIp((String) list.get(i).get("IP"));
+
+                monitorBeanShow.setType((String) list.get(i).get("Type"));
+
+                monitorBeanShow.setAvailability((String) list.get(i).get("Availability"));
+
+                monitorBeanList.add(monitorBeanShow);
+
             }
 
-            System.out.println("Result for Command ping.");
+            monitorBean.setMonitorBeanList(monitorBeanList);
 
-            while ((s = error.readLine()) !=null)
-            {
-                System.out.println(s);
-            }
-
-            System.out.println("Error for Command ping.");
         }
-
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
+
+        return true;
     }
+
+    public boolean monitorDeleteInDatabase(MonitorBean monitorBean)
+    {
+        try
+        {
+            monitorDao.monitorDeleteData(monitorBean.getId());
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
 }

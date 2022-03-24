@@ -72,7 +72,7 @@ public class DiscoveryDao
     }
 
 
-    public String discovery(String Name, String IP, String Type, String username, String password)
+    public String discovery(String name, String ip, String type, String username, String password)
     {
         Connection con = null;
 
@@ -90,11 +90,11 @@ public class DiscoveryDao
             {
                 preparedStatementOfInsert = con.prepareStatement("INSERT INTO Discovery (Name, IP, Type, Username, Password) VALUES(?,?,?,?,?)");
 
-                preparedStatementOfInsert.setString(1, Name);
+                preparedStatementOfInsert.setString(1, name);
 
-                preparedStatementOfInsert.setString(2, IP);
+                preparedStatementOfInsert.setString(2, ip);
 
-                preparedStatementOfInsert.setString(3, Type);
+                preparedStatementOfInsert.setString(3, type);
 
                 preparedStatementOfInsert.setString(4, username);
 
@@ -198,7 +198,7 @@ public class DiscoveryDao
         return list;
     }
 
-    public String discoveryGetUsernameDaoData()
+    public String discoveryGetUsernameDaoData(int id)
     {
         String uname="";
 
@@ -214,9 +214,11 @@ public class DiscoveryDao
 
             if ( con != null) {
 
-                preparedStatement = con.prepareStatement("SELECT Username FROM Discovery");
+                preparedStatement = con.prepareStatement("SELECT Username FROM Discovery WHERE Id=?");
 
                 System.out.println("Prepared statement created successfully");
+
+                preparedStatement.setInt(1, id);
 
                 resultSet = preparedStatement.executeQuery();
 
@@ -253,7 +255,7 @@ public class DiscoveryDao
         return uname;
     }
 
-    public String discoveryUpdateData(String name, String ip, String username, String password, String id)
+    public String discoveryUpdateData(String name, String ip, String username, String password, int id)
     {
         Connection con = null;
 
@@ -279,7 +281,7 @@ public class DiscoveryDao
 
                 preparedStatementOfUpdate.setString(4, encodedPassword);
 
-                preparedStatementOfUpdate.setInt(5, Integer.parseInt(id));
+                preparedStatementOfUpdate.setInt(5, id);
 
                 int result = preparedStatementOfUpdate.executeUpdate();
 
@@ -309,7 +311,7 @@ public class DiscoveryDao
         return null;
     }
 
-    public String discoveryDeleteData(String id)
+    public String discoveryDeleteData(int id)
     {
         Connection con = null;
 
@@ -323,7 +325,7 @@ public class DiscoveryDao
             {
                 preparedStatementOfDelete = con.prepareStatement("DELETE FROM Discovery WHERE Id = ?");
 
-                preparedStatementOfDelete.setInt(1, Integer.parseInt(id));
+                preparedStatementOfDelete.setInt(1, id);
 
                 int result = preparedStatementOfDelete.executeUpdate();
 
