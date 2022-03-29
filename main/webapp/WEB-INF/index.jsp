@@ -7,52 +7,71 @@
     <title>Welcome</title>
 
     <!-- plugins:css -->
-    <link rel="stylesheet" href="vendors/feather/feather.css">
-    <link rel="stylesheet" href="vendors/mdi/css/materialdesignicons.min.css">
-    <link rel="stylesheet" href="vendors/ti-icons/css/themify-icons.css">
-    <link rel="stylesheet" href="vendors/typicons/typicons.css">
-    <link rel="stylesheet" href="vendors/simple-line-icons/css/simple-line-icons.css">
-    <link rel="stylesheet" href="vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/vendors/feather/feather.css">
+    <link rel="stylesheet" href="/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/vendors/ti-icons/css/themify-icons.css">
+    <link rel="stylesheet" href="/vendors/typicons/typicons.css">
+    <link rel="stylesheet" href="/vendors/simple-line-icons/css/simple-line-icons.css">
+    <link rel="stylesheet" href="/vendors/css/vendor.bundle.base.css">
     <!-- endinject -->
     <!-- Plugin css for this page -->
-    <link rel="stylesheet" href="vendors/datatables.net-bs4/dataTables.bootstrap4.css">
-    <link rel="stylesheet" href="js/select.dataTables.min.css">
+    <link rel="stylesheet" href="/vendors/datatables.net-bs4/dataTables.bootstrap4.css">
+    <link rel="stylesheet" href="/js/select.dataTables.min.css">
     <!-- End plugin css for this page -->
     <!-- inject:css -->
-    <link rel="stylesheet" href="css/vertical-layout-light/style.css">
+    <link rel="stylesheet" href="/css/vertical-layout-light/style.css">
     <!-- endinject -->
-    <link rel="shortcut icon" href="images/favicon.png" />
+    <link rel="shortcut icon" href="/images/favicon.png" />
 
     <link rel="stylesheet" href="/scss/vertical-layout-light/_sidebar.scss">
+    <link rel="stylesheet" href="/scss/common/light/_utilities.scss">
+    <link rel="stylesheet" href="/scss/common/light/components/plugin-overrides/_colcade.scss">
+    <link rel="stylesheet" href="/scss/common/light/components/plugin-overrides/_chartist.scss">
+    <link rel="stylesheet" href="/scss/common/light/components/_tabs.scss">
+    <link rel="stylesheet" href="/scss/common/light/mixins/_cards.scss">
 
 
     <link rel="stylesheet" href="/css/index-main-style.css">
 
 
-    <%--<script src="/index.html"></script>--%>
+    <%--<script type="text/html" src="/partials/_navbar.html"></script>--%>
 
     <script src="/js/jQueryFile.js"></script>
     <script type="text/javascript" src="/js/loginPage.js"></script>
     <script src="/js/discoveryjQuery.js"></script>
+
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
     <script>
+
         $(document).ready(function () {
-
-            //discoveryVariable.discoveryFunction();
-
-            //discoveryVariable.discoveryIn();
 
             discoveryVariable.discoveryOnClick();
 
-            discoveryVariable.showSSHFields();
-
-            //discoveryVariable.discoveryAddClickButton();
-
+            discoveryVariable.showMonitor();
 
         });
+
+    </script>
+    <script type="text/javascript">
+
+        function drawChart() {
+            var stars = [135850, 52122, 148825, 16939, 9763];
+            var frameworks = ['React', 'Angular', 'Vue', 'Hyperapp', 'Omi'];
+            new Chart('myChart', {
+                type: 'bar',
+                data: {
+                    labels: frameworks,
+                    datasets: [{
+                        label: 'Github Stars',
+                        data: stars
+                    }]
+                },
+            });
+        }
     </script>
 </head>
-<body <%--class="sidebar-icon-only"--%>>
-
+<body  <%--class="sidebar-icon-only"--%>>
 <%--<div class="icon-bar">
     <a class="active" ><i class="fa fa-tachometer" aria-hidden="true"> Dashboard</i></a>
     <button id="discovery-a"  class="btn btn-primLogoutary" onclick="discoveryIn()"><i class="fa fa-search"> Discovery</i></button>
@@ -1053,7 +1072,7 @@
             <!-- partial:partials/_footer.html -->
             <footer class="footer">
                 <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Premium <a href="https://www.bootstrapdash.com/" target="_blank">Bootstrap admin template</a> from BootstrapDash.</span>
+                    <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">From <a href="" target="_blank">light NMS</a></span>
                     <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Copyright © 2021. All rights reserved.</span>
                 </div>
             </footer>
@@ -1066,25 +1085,26 @@
 <!-- container-scroller -->
 
 <!-- plugins:js -->
-<script src="vendors/js/vendor.bundle.base.js"></script>
+<script src="/vendors/js/vendor.bundle.base.js"></script>
 <!-- endinject -->
 <!-- Plugin js for this page -->
-<script src="vendors/chart.js/Chart.min.js"></script>
-<script src="vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
-<script src="vendors/progressbar.js/progressbar.min.js"></script>
+<script src="/vendors/chart.js/Chart.min.js"></script>
+<script src="/vendors/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+<script src="/vendors/progressbar.js/progressbar.min.js"></script>
 
 <!-- End plugin js for this page -->
 <!-- inject:js -->
-<script src="js/off-canvas.js"></script>
-<script src="js/hoverable-collapse.js"></script>
-<script src="js/template.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/todolist.js"></script>
+<script src="/js/off-canvas.js"></script>
+<script src="/js/hoverable-collapse.js"></script>
+<script src="/js/template.js"></script>
+<script src="/js/settings.js"></script>
+<script src="/js/todolist.js"></script>
 <!-- endinject -->
 <!-- Custom js for this page-->
-<script src="js/jquery.cookie.js" type="text/javascript"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/Chart.roundedBarCharts.js"></script>
+<script src="/js/jquery.cookie.js" type="text/javascript"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/Chart.roundedBarCharts.js"></script>
+<script src="/js/chart.js"></script>
 <!-- End custom js for this page-->
 
 
