@@ -11,7 +11,7 @@ public class MonitorBean
     String name;
     String ip;
     String type;
-    String id;
+    int id;
     String availability;
 
 
@@ -41,11 +41,11 @@ public class MonitorBean
         this.type = type;
     }
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 

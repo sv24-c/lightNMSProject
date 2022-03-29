@@ -1,17 +1,14 @@
 package action;
 
-
-import dao.LoginDao;
 import executor.LoginExecutor;
 
-import static sun.management.Agent.getText;
 
 public class LoginAction
 {
-    String userName;
-    String password;
+    private String userName;
+    private String password;
 
-    LoginExecutor loginExecutor = new LoginExecutor();
+    private LoginExecutor loginExecutor = new LoginExecutor();
 
     public String getUserName()
     {

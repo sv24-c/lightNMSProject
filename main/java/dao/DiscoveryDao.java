@@ -198,6 +198,75 @@ public class DiscoveryDao
         return list;
     }
 
+    public List discoveryCheckRedundantData(String ip, String type)
+    {
+        ResultSet resultSet;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null) {
+
+                preparedStatement = con.prepareStatement("SELECT IP, Type FROM Discovery WHERE IP =? AND TYPE  = ?");
+
+                System.out.println("Prepared statement created successfully");
+
+                preparedStatement.setString(1, ip);
+
+                preparedStatement.setString(2, type);
+
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next()) {
+
+                    Map<String, Object> map = new LinkedHashMap<String, Object>();
+
+                    System.out.println("New LinkedHashMap has created ");
+
+                    map.put("IP", resultSet.getString(1));
+
+                    map.put("Type", resultSet.getString(2));
+
+                    list.add(map);
+
+                    System.out.println("Map added to list.");
+
+                }
+            }
+
+            else
+            {
+                System.out.println("Connection is not established");
+            }
+
+        }
+
+        catch (SQLException e)
+        {
+
+            System.out.println("SQL State: "+ e.getSQLState());
+
+            System.out.println("Error Code "+ e.getErrorCode());
+
+            System.out.println(e.getMessage());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatement, con);
+        }
+
+        return list;
+    }
+
     public String discoveryGetUsernameDaoData(int id)
     {
         String uname="";

@@ -1,7 +1,9 @@
 package action;
 
 import bean.MonitorBean;
+import bean.PollingBean;
 import com.opensymphony.xwork2.ModelDriven;
+import dao.PollingDao;
 import executor.MonitorExecutor;
 import helper.MonitorHelper;
 
@@ -16,14 +18,15 @@ public class MonitorAction implements ModelDriven
 
     MonitorBean monitorBean = new MonitorBean();
 
-    MonitorExecutor monitorExecutor = new MonitorExecutor();
-
     public String monitor()
     {
 
         try
         {
-            if(new MonitorExecutor().monitorPing(monitorBean))
+
+            MonitorExecutor monitorExecutor = new MonitorExecutor();
+
+            if(monitorExecutor.monitorPing(monitorBean))
             {
                 return "success";
             }
@@ -47,6 +50,8 @@ public class MonitorAction implements ModelDriven
     {
         try
         {
+            MonitorExecutor monitorExecutor = new MonitorExecutor();
+
             if(monitorExecutor.monitorShowAllData(monitorBean))
             {
                 return "success";
@@ -70,6 +75,8 @@ public class MonitorAction implements ModelDriven
     {
         try
         {
+            MonitorExecutor monitorExecutor = new MonitorExecutor();
+
             monitorExecutor.monitorDeleteInDatabase(monitorBean);
         }
         catch (Exception e)
@@ -78,6 +85,34 @@ public class MonitorAction implements ModelDriven
         }
 
         return "success";
+    }
+
+    public String monitorShowInTable()
+    {
+
+        try
+        {
+            MonitorExecutor monitorExecutor = new MonitorExecutor();
+
+            PollingBean pollingBean = new PollingBean();
+
+            if(monitorExecutor.monitorShowAllDataInTable(pollingBean))
+            {
+                return "success";
+            }
+            else
+            {
+                return "failure";
+            }
+
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return "failure";
     }
 
     @Override

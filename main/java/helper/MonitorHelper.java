@@ -2,17 +2,15 @@ package helper;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
-import com.mysql.cj.Session;
+import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by smit on 22/3/22.
@@ -20,6 +18,8 @@ import java.util.regex.Pattern;
 
 public class MonitorHelper
 {
+
+
     public boolean ping(List<String> pinglist)
     {
 
@@ -64,8 +64,13 @@ public class MonitorHelper
                     System.out.println("Error for Command ping."+s);
                 }
 
+
                 if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) == 5))
                 {
+                    System.out.println(Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))));
+                    System.out.println(Integer.parseInt(packetdata.substring((packetdata.indexOf(" packets transmitted")  - 1), packetdata.indexOf(" packets transmitted"))));
+                    System.out.println(Float.parseFloat(packetdata.substring((packetdata.indexOf(" ms")-5), packetdata.indexOf(" ms"))));
+
                     return true;
                 }
                 else

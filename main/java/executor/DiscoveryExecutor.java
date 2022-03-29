@@ -74,12 +74,26 @@ public class DiscoveryExecutor
 
     public boolean discoveryInsertInDatabase(DiscoveryBean discoveryBean)
     {
-        DiscoveryDao discoveryDao = new DiscoveryDao();
 
         try
         {
-            new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
 
+            DiscoveryDao discoveryDao = new DiscoveryDao();
+
+            List<Map<String, Object>> list;
+
+            list = new DiscoveryDao().discoveryCheckRedundantData(discoveryBean.getIP(), discoveryBean.getType());
+
+            if (list.isEmpty())
+            {
+                new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
+
+                return true;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         catch (Exception e)
@@ -87,11 +101,7 @@ public class DiscoveryExecutor
             e.printStackTrace();
         }
 
-
-
-
-
-        return true;
+        return false;
     }
 
     public boolean discoveryUpdateInDatabase(DiscoveryBean discoveryBean)

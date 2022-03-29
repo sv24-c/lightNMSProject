@@ -71,7 +71,7 @@ public class MonitorDao
         }
     }
 
-    public List monitorShowData(String id)
+    public List monitorShowData(int id)
     {
         ResultSet resultSet;
 
@@ -92,7 +92,7 @@ public class MonitorDao
 
                 System.out.println("Prepared statement created successfully");
 
-                preparedStatement.setInt(1, Integer.parseInt(id));
+                preparedStatement.setInt(1, id);
 
                 resultSet = preparedStatement.executeQuery();
 
@@ -146,7 +146,7 @@ public class MonitorDao
         return list;
     }
 
-    public String monitorInsertInDataBase(String id, String name, String ip, String type)
+    public String monitorInsertInDataBase(int id, String name, String ip, String type)
     {
         Connection con = null;
 
@@ -162,7 +162,7 @@ public class MonitorDao
             {
                 preparedStatementOfInsert = con.prepareStatement("INSERT INTO Monitor (Id, Name, IP, Type, Availability) VALUES(?,?,?,?,?)");
 
-                preparedStatementOfInsert.setString(1, id);
+                preparedStatementOfInsert.setInt(1, id);
 
                 preparedStatementOfInsert.setString(2, name);
 
@@ -229,7 +229,7 @@ public class MonitorDao
 
                     System.out.println("New LinkedHashMap has created ");
 
-                    map.put("Id", resultSet.getString(1));
+                    map.put("Id", resultSet.getInt(1));
 
                     map.put("Name", resultSet.getString(2));
 
@@ -272,7 +272,7 @@ public class MonitorDao
         return list;
     }
 
-    public String  monitorDeleteData(String id)
+    public String  monitorDeleteData(int id)
     {
         Connection con = null;
 
@@ -286,7 +286,7 @@ public class MonitorDao
             {
                 preparedStatementOfDelete = con.prepareStatement("DELETE FROM Monitor WHERE Id = ?");
 
-                preparedStatementOfDelete.setInt(1, Integer.parseInt(id));
+                preparedStatementOfDelete.setInt(1, id);
 
                 int result = preparedStatementOfDelete.executeUpdate();
 
@@ -315,4 +315,111 @@ public class MonitorDao
 
         return null;
     }
+
+    public String monitorAvailabilityUpdate(String availability, int id)
+    {
+        Connection con = null;
+
+        PreparedStatement preparedStatementOfUpdate = null;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null)
+            {
+
+                preparedStatementOfUpdate = con.prepareStatement("UPDATE Monitor SET Availability=? where Id=?");
+
+                preparedStatementOfUpdate.setString(1, availability);
+
+                preparedStatementOfUpdate.setInt(2, id);
+
+                int result = preparedStatementOfUpdate.executeUpdate();
+
+                System.out.println(result + " record Updated successfully");
+
+            }
+
+            else
+            {
+                System.out.println("Connection not established...");
+            }
+        }
+
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+
+            System.out.println(e.getStackTrace());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatementOfUpdate, con);
+        }
+
+        return null;
+    }
+
+    public int monitorCheckRedundantIdData(int id)
+    {
+        ResultSet resultSet;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        int resultid = 0;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null)
+            {
+
+                preparedStatement = con.prepareStatement("SELECT Id FROM Monitor where Id = ?");
+
+                System.out.println("Prepared statement created successfully");
+
+                preparedStatement.setInt(1, id);
+
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next())
+                {
+                    resultSet.getInt(id);
+
+                }
+            }
+
+            else
+            {
+                System.out.println("Connection is not established");
+            }
+
+        }
+
+        catch (SQLException e)
+        {
+
+            System.out.println("SQL State: "+ e.getSQLState());
+
+            System.out.println("Error Code "+ e.getErrorCode());
+
+            System.out.println(e.getMessage());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatement, con);
+        }
+
+        return resultid;
+    }
 }
+
+

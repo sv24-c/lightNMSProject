@@ -10,16 +10,15 @@ import executor.DiscoveryExecutor;
 public class DiscoveryAction implements ModelDriven
 {
 
-    DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
-
     DiscoveryBean discoveryBean = new DiscoveryBean();
 
     public String discovery()
     {
-        DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
 
         try
         {
+            DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
+
             if(discoveryExecutor.discoveryShowData(discoveryBean))
             {
                 return "success";
@@ -41,10 +40,11 @@ public class DiscoveryAction implements ModelDriven
 
     public String discoveryGetUsername()
     {
-        DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
 
         try
         {
+            DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
+
             if(discoveryExecutor.discoveryGetUsernameData(discoveryBean))
             {
                 return "success";
@@ -68,8 +68,11 @@ public class DiscoveryAction implements ModelDriven
     {
         try
         {
-            if(new DiscoveryExecutor().discoveryInsertInDatabase(discoveryBean))
+            DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
+
+            if(discoveryExecutor.discoveryInsertInDatabase(discoveryBean))
             {
+
                 return "success";
             }
 
@@ -90,6 +93,8 @@ public class DiscoveryAction implements ModelDriven
     {
         try
         {
+            DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
+
             if(discoveryExecutor.discoveryUpdateInDatabase(discoveryBean))
             {
                 return "success";
@@ -111,6 +116,8 @@ public class DiscoveryAction implements ModelDriven
     {
         try
         {
+            DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
+
             discoveryExecutor.discoveryDeleteInDatabase(discoveryBean);
         }
         catch (Exception e)

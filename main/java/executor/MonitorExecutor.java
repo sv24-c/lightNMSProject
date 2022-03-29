@@ -1,9 +1,12 @@
 package executor;
 
 import bean.MonitorBean;
+import bean.PollingBean;
 import dao.MonitorDao;
+import dao.PollingDao;
 import helper.MonitorHelper;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -14,8 +17,6 @@ import java.util.Map;
 public class MonitorExecutor
 {
 
-    MonitorHelper monitorHelper = new MonitorHelper();
-
     MonitorDao monitorDao = new MonitorDao();
 
     public boolean monitorPing(MonitorBean monitorBean)
@@ -23,6 +24,8 @@ public class MonitorExecutor
 
         try
         {
+
+            MonitorHelper monitorHelper = new MonitorHelper();
 
             String name = null;
             String ip = null;
@@ -54,28 +57,59 @@ public class MonitorExecutor
 
             pingcommands.add("ping");
             pingcommands.add("-c");
-            pingcommands.add("5");  
+            pingcommands.add("5");
             pingcommands.add(ip);
 
-            pingresult = new MonitorHelper().ping(pingcommands);
+            pingresult = monitorHelper.ping(pingcommands);
 
-            if(pingresult && type.equals("Ping"))
+            if(pingresult && type.equals("Ping") )
             {
+
                 monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+
+                return true;
+
+                /*if(monitorDao.monitorCheckRedundantIdData(monitorBean.getId()) == monitorBean.getId())
+                {
+                    return true;
+                }
+                else
+                {
+                    monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+
+                    return true;
+                }*/
             }
 
             else if(pingresult && type.equals("SSH"))
             {
-                if(new MonitorHelper().ssh(username, password, ip, command))
+
+                if (monitorHelper.ssh(username, password, ip, command))
                 {
+
                     monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+
+                    return true;
+
+                    /*if (monitorDao.monitorCheckRedundantIdData(monitorBean.getId()) == monitorBean.getId())
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+
+                        return true;
+                    }*/
                 }
-                System.out.println("Do ping first then also ssh");
+
             }
 
             else
             {
                 System.out.println("Make sure type is appropriate");
+
+                return false;
             }
 
         }
@@ -84,15 +118,13 @@ public class MonitorExecutor
             e.printStackTrace();
         }
 
-        return true;
+        return false;
     }
 
     public boolean monitorShowAllData(MonitorBean monitorBean)
     {
         try
         {
-
-            MonitorDao monitorDao = new MonitorDao();
 
             List<Map<String, Object>> list;
 
@@ -104,7 +136,7 @@ public class MonitorExecutor
             {
                 MonitorBean monitorBeanShow = new MonitorBean();
 
-                monitorBeanShow.setId(String.valueOf(list.get(i).get("Id")));
+                monitorBeanShow.setId((Integer) list.get(i).get("Id"));
 
                 monitorBeanShow.setName(String.valueOf(list.get(i).get("Name")));
 
@@ -133,6 +165,7 @@ public class MonitorExecutor
     {
         try
         {
+
             monitorDao.monitorDeleteData(monitorBean.getId());
         }
         catch (Exception e)
@@ -141,6 +174,77 @@ public class MonitorExecutor
         }
 
         return true;
+    }
+
+    public boolean monitorShowAllDataInTable(PollingBean pollingBean)
+    {
+        try
+        {
+            List<Object> matrixList = new ArrayList<>();
+
+            List<Object> pingShowResultList = new ArrayList<>();
+
+            List<Object> sshShowResultList = new ArrayList<>();
+
+            PollingDao pollingDao = new PollingDao();
+
+            MonitorBean monitorBean = new MonitorBean();
+
+            System.out.println(monitorBean.getType());
+            System.out.println(pollingBean.getType());
+
+            if (monitorBean.getType().equals("Ping"))
+            {
+                pingShowResultList = pollingDao.getPollingPingData(pollingBean.getId());
+
+                for (int i = 0; i < pingShowResultList.size(); i++)
+                {
+
+                    PollingBean pollingBeanPingMatrix = new PollingBean();
+
+                    pollingBeanPingMatrix.setSendPacket((Integer) pingShowResultList.get(0));
+                    pollingBeanPingMatrix.setReceivePacket((Integer) pingShowResultList.get(1));
+                    pollingBeanPingMatrix.setPacketLoss((Integer) pingShowResultList.get(2));
+                    pollingBeanPingMatrix.setRtt((Float) pingShowResultList.get(3));
+
+                }
+
+                return true;
+            }
+
+            else if (pollingBean.getType().equals("Ping"))
+            {
+
+                sshShowResultList = pollingDao.getPollingSSHData(pollingBean.getId());
+
+                for (int i = 0; i < sshShowResultList.size(); i++)
+                {
+
+                    PollingBean pollingBeanSSHMatrix = new PollingBean();
+
+                    pollingBeanSSHMatrix.setCpu((Float) sshShowResultList.get(0));
+                    pollingBeanSSHMatrix.setMemory((Float) sshShowResultList.get(1));
+                    pollingBeanSSHMatrix.setDisk((Float) sshShowResultList.get(2));
+                }
+
+                return true;
+            }
+
+            else
+            {
+                System.out.println("Not able to get Data");
+
+                return false;
+            }
+
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
 }
