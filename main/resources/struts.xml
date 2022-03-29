@@ -64,6 +64,21 @@
             <result name="failure">login.jsp</result>
         </action>
 
+        <action name="monitorShowDataProcess" class="action.MonitorAction" method="showAllData">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
+        <action name="monitorDeleteProcess" class="action.MonitorAction" method="monitorDelete">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
+        <action name="monitorShowTableProcess" class="action.MonitorAction" method="monitorShowInTable">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+        </action>
+
     </package>
 
 </struts>
