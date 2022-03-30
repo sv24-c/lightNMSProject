@@ -4,6 +4,7 @@
 
 var v = '<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery table</h4>   <button type="submit" class="btn btn-primary me-2" id="dis-add-btn" onclick="discoveryClickButton()">Add</button>     <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> </tr> </thead> <tbody id="tablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>';
 var vtwo = '<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <div class="container" > <div class="col-lg-5"> <div class="row"> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>Name</label><br /> <input type="text" name="Name" id="name" class="form-control input-sm" placeholder="Name" required /> </div> </div> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>IP</label><br /> <input type="text" name="IP" id="ip" class="form-control input-sm" placeholder="IP" required /> </div> </div> </div> <div class="form-group"> <label for="type">Select Device Type:</label> <select name="Type" id="type" required> <option value="ping">Ping</option> <option value="ssh">SSH</option> </select>  </div> <div id="adc" style="display: none;"> <label for="type">UserName</label><br /> <input type="text" class="form-control input-sm" id="usernamessh" name="usernamessh" placeholder="UserName" required /><br /> <label for="type">Password</label><br /> <input type="password" class="form-control input-sm" id="passwordssh" name="passwordssh"placeholder="Password" required /><br /><br /> </div> <button type="button" class="btn btn-success btn-block" id="add-btn">Add</button> </div></div><div class="text-center" id="resp" style="margin-top: 14px;" ></div></div></div></div>';
+var ip = null;
 
 var discoveryVariable = {
 
@@ -16,7 +17,7 @@ var discoveryVariable = {
             $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery table</h4>   <button type="submit" class="btn btn-primary me-2" id="dis-add-btn" onclick="discoveryClickButton()">Add</button>     <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> </tr> </thead> <tbody id="tablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
 
             $.ajax({
-                type: "GET",
+                type: "POST",
                 url:"discoveryProcess",
                 success: function (data)
                 {
@@ -29,7 +30,7 @@ var discoveryVariable = {
                             "<td>" + this.IP + "</td>" +
                             "<td>" + this.type + "</td>" +
                             "<td>"+
-                            "<button onclick='addToMonitor(this);' data-id='"+this.id+"' class='btn btn-sm btn-info' >Provision</button>"+
+                            "<button onclick='provision(this);' data-id='"+this.id+"' class='btn btn-sm btn-info' >Provision</button>"+
                             "<button onclick='deleteUser(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"+
                             "<button onclick='editUser(this);' data-id='"+this.id+"' class='btn btn-sm btn-secondary' id='dis-edit-btn'>Edit</button>"+
                             "</td></tr>";
@@ -60,7 +61,7 @@ var discoveryVariable = {
             $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery table</h4> <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Availability </th> <th> Operation </th></tr> </thead> <tbody id="monitortablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
 
             $.ajax({
-                type: "GET",
+                type: "POST",
                 url:"monitorShowDataProcess",
                 success: function (data)
                 {
@@ -264,7 +265,7 @@ function deleteDis(that)
     });
 }
 
-function addToMonitor(that) {
+function provision(that) {
 
     var id = $(that).data("id");
 
@@ -430,36 +431,16 @@ function showMonitor(that)
 
     var type = $(that).data("value");
     var id = $(that).data("id");
+    ip = $(that).parent().prev().prev().prev().text();
 
-   if(type === "Ping")
+    if(type === "Ping")
    {
-       $("#overview").html('<div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"><div id="chartContainerPartTwo" style="height: 300px; width: 100%;"></div></div></div>  <br><br><br>      <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px"><div id="packetLoss" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Packet Loss(%)<hr><p style="font-size: 25px">10%</p></div>    <div id="rtt" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">RTT(ms)<hr><p style="font-size: 25px">100</p> </div><div id="ReceivePacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Receive Packet<hr><p style="font-size: 25px">5</p> </div><div id="SendPacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Send Packet<hr><p style="font-size: 25px">5</p></div>    </div>  </div></div>    ');
+       $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div> <br><br> <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"><div id="chartContainerPartTwo" style="height: 300px; width: 100%;"></div></div></div>  <br><br><br>      <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="packetLoss" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Packet Loss(%)<hr><p style="font-size: 25px"></p></div>    <div id="rtt" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">RTT(ms)<hr><p style="font-size: 25px"> </p> </div><div id="ReceivePacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Receive Packet<hr><p style="font-size: 25px"> </p> </div><div id="SendPacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Send Packet<hr><p style="font-size: 25px"> </p></div>    </div>  </div></div>    ');
 
-       var chart = new CanvasJS.Chart("chartContainer", {
-           animationEnabled: true,
-           title:{
-               text: "Email Categories",
-               horizontalAlign: "left"
-           },
-           data: [{
-               type: "doughnut",
-               startAngle: 60,
-               //innerRadius: 60,
-               indexLabelFontSize: 17,
-               indexLabel: "{label} - #percent%",
-               toolTipContent: "<b>{label}:</b> {y} (#percent%)",
-               dataPoints: [
-                   { y: 67, label: "Inbox" },
-                   { y: 28, label: "Archives" },
-                   { y: 10, label: "Labels" },
-                   { y: 7, label: "Drafts"},
-                   { y: 15, label: "Trash"},
-                   { y: 6, label: "Spam"}
-               ]
-           }]
-       });
-       chart.render();
 
+
+       var up = 0;
+       var down = 0;
 
        var chart = new CanvasJS.Chart("chartContainerPartTwo", {
            animationEnabled: true,
@@ -496,15 +477,40 @@ function showMonitor(that)
        });
        chart.render();
 
-
        $.ajax({
-           type: "GET",
+           type: "POST",
            data: "id="+id+"&type="+type,
            url:"monitorShowTableProcess",
            success: function (data)
            {
-               $("#packetLoss p").val()
-               //$("#usernamessh").val(data.username);
+               $("#packetLoss p").text(data.matrixList[2]);
+               $("#sendPacket p").text(data.matrixList[0]);
+               $("#receivePacket p").text(data.matrixList[1]);
+               $("#rtt p").text(data.matrixList[3]);
+               up = data.pingStatusList[0];
+               down = data.pingStatusList[1];
+
+               var chart = new CanvasJS.Chart("chartContainer", {
+                   animationEnabled: true,
+                   title:{
+                       text: "Availability of last 24 Hour",
+                       horizontalAlign: "left"
+                   },
+                   data: [{
+                       type: "doughnut",
+                       startAngle: 60,
+                       //innerRadius: 60,
+                       indexLabelFontSize: 17,
+                       indexLabel: "{label} - #percent%",
+                       toolTipContent: "<b>{label}:</b> {y} (#percent%)",
+                       dataPoints: [
+                           { y: up, label: "Up" },
+                           { y: down, label: "Down" },
+                       ]
+                   }]
+               });
+               chart.render();
+
            },
            error: function ()
            {
@@ -516,32 +522,92 @@ function showMonitor(that)
 
    else if(type === "SSH")
    {
-       $("#overview").html('<div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"> </div></div>  <br><br><br>   <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 200px"><div id="cpu" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px; padding: 10px">CPU(%)<hr><p style="font-size: 25px">10%</p></div>    <div id="disk" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Disk(%)<hr><p style="font-size: 25px">70%</p> </div><div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Memory(%)<hr><p style="font-size: 25px">5%</p></div>    </div>  </div></div>  ');
+       $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div><br><br>   <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"> </div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"> <div id="chartContainerPartTwo" style="height: 300px; width: 100%;"></div> </div></div>  <br><br><br>   <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="cpu" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px; padding: 10px">CPU(%)<hr><p style="font-size: 25px"></p></div>    <div id="disk" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Disk(%)<hr><p style="font-size: 25px"></p> </div><div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Memory(MB)<hr><p style="font-size: 25px"></p></div>  <div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Swap Memory(MB)<hr><p style="font-size: 25px"></p></div>  </div>  </div></div>  ');
 
-       var chart = new CanvasJS.Chart("chartContainer", {
+
+       var up = 0;
+       var down = 0;
+
+       var chart = new CanvasJS.Chart("chartContainerPartTwo", {
            animationEnabled: true,
+           exportEnabled: true,
+           theme: "light1", // "light1", "light2", "dark1", "dark2"
            title:{
-               text: "Email Categories",
-               horizontalAlign: "left"
+               text: "Simple Column Chart with Index Labels"
+           },
+           axisY: {
+               includeZero: true
            },
            data: [{
-               type: "doughnut",
-               startAngle: 60,
-               //innerRadius: 60,
-               indexLabelFontSize: 17,
-               indexLabel: "{label} - #percent%",
-               toolTipContent: "<b>{label}:</b> {y} (#percent%)",
+               type: "column", //change type to bar, line, area, pie, etc
+               //indexLabel: "{y}", //Shows y value on all Data Points
+               indexLabelFontColor: "#5A5757",
+               indexLabelFontSize: 16,
+               indexLabelPlacement: "outside",
                dataPoints: [
-                   { y: 67, label: "Inbox" },
-                   { y: 28, label: "Archives" },
-                   { y: 10, label: "Labels" },
-                   { y: 7, label: "Drafts"},
-                   { y: 15, label: "Trash"},
-                   { y: 6, label: "Spam"}
+                   { x: 10, y: 71 },
+                   { x: 20, y: 55 },
+                   { x: 30, y: 50 },
+                   { x: 40, y: 65 },
+                   { x: 50, y: 92, indexLabel: "\u2605 Highest" },
+                   { x: 60, y: 68 },
+                   { x: 70, y: 38 },
+                   { x: 80, y: 71 },
+                   { x: 90, y: 54 },
+                   { x: 100, y: 60 },
+                   { x: 110, y: 36 },
+                   { x: 120, y: 49 },
+                   { x: 130, y: 21, indexLabel: "\u2691 Lowest" }
                ]
            }]
        });
        chart.render();
+
+       $.ajax({
+           type: "POST",
+           data: "id="+id+"&type="+type,
+           url:"monitorShowTableProcess",
+           success: function (data)
+           {
+               $("#cpu p").text(data.sshMatrixList[0]);
+               $("#disk p").text(data.sshMatrixList[2]);
+               $("#memory p").text(data.sshMatrixList[1]);
+               up = data.sshStatusList[0];
+               down = data.sshStatusList[1];
+
+               var chart = new CanvasJS.Chart("chartContainer", {
+                   animationEnabled: true,
+                   title:{
+                       text: "Availability of Last 24 Hour",
+                       horizontalAlign: "left"
+                   },
+
+                   data: [{
+                       type: "doughnut",
+                       startAngle: 60,
+                       //innerRadius: 60,
+                       indexLabelFontSize: 17,
+                       indexLabel: "{label} - #percent%",
+                       toolTipContent: "<b>{label}:</b> {y} (#percent%)",
+                       dataPoints: [
+                           { y: up, label: "Up" },
+                           { y: down, label: "Down" },
+
+                       ]
+                   }]
+               });
+               chart.render();
+
+           },
+           error: function ()
+           {
+               alert("Something went Wrong");
+           }
+       });
+
+
+
+
    }
 
 }
