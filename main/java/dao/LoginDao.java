@@ -26,7 +26,7 @@ public class LoginDao //extends ActionSupport
         }
     }
 
-    public Connection makeConnection()
+    private Connection makeConnection()
     {
         Connection con = null;
 
@@ -47,7 +47,7 @@ public class LoginDao //extends ActionSupport
         return con;
     }
 
-    public void closeConnection(PreparedStatement preparedStatement, Connection connection)
+    private void closeConnection(PreparedStatement preparedStatement, Connection connection)
     {
         try
         {
@@ -80,7 +80,7 @@ public class LoginDao //extends ActionSupport
 
         PreparedStatement preparedStatement = null;
 
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = new ArrayList<>();
 
         try
         {
@@ -98,7 +98,7 @@ public class LoginDao //extends ActionSupport
 
             while (resultSet.next())
             {
-                Map<String, Object> map = new LinkedHashMap<String, Object>();
+                Map<String, Object> map = new LinkedHashMap<>();
 
                 System.out.println("New LinkedHashMap has created ");
 

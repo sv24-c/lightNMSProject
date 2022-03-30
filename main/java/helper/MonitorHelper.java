@@ -2,14 +2,12 @@ package helper;
 
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
-import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -18,7 +16,6 @@ import java.util.List;
 
 public class MonitorHelper
 {
-
 
     public boolean ping(List<String> pinglist)
     {
@@ -69,7 +66,7 @@ public class MonitorHelper
                 {
                     System.out.println(Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))));
                     System.out.println(Integer.parseInt(packetdata.substring((packetdata.indexOf(" packets transmitted")  - 1), packetdata.indexOf(" packets transmitted"))));
-                    System.out.println(Float.parseFloat(packetdata.substring((packetdata.indexOf(" ms")-5), packetdata.indexOf(" ms"))));
+                    //System.out.println(Float.parseFloat(packetdata.substring((packetdata.indexOf(" ms")-5), packetdata.indexOf(" ms"))));
 
                     return true;
                 }
@@ -94,11 +91,17 @@ public class MonitorHelper
         {
             try
             {
-                reader.close();
+                if (reader != null) {
+                    reader.close();
+                }
 
-                error.close();
+                if (error != null) {
+                    error.close();
+                }
 
-                process.destroy();
+                if (process != null) {
+                    process.destroy();
+                }
 
             }
             catch (IOException e)
@@ -110,7 +113,7 @@ public class MonitorHelper
         return false;
     }
 
-    public boolean ssh(String username, String password, String ip, String command)
+    public boolean ssh(String username, String password, String ip)
     {
         Base64 base64 = new Base64();
 
@@ -123,62 +126,27 @@ public class MonitorHelper
         try
         {
 
-            if(session==null && channel == null)
+            session = new JSch().getSession(username, ip, 22);
+
+            session.setPassword(decryptedPassword);
+
+            session.setConfig("StrictHostKeyChecking", "no");
+
+            session.setTimeout(10000);
+
+            session.connect();
+
+            channel = (ChannelExec) session.openChannel("exec");
+
+            channel.connect(10000);
+
+            System.out.println("Channel connection done.");
+
+            if (channel.isConnected() && session.isConnected())
             {
-                session = new JSch().getSession(username, ip, 22);
-
-                session.setPassword(decryptedPassword);
-
-                session.setConfig("StrictHostKeyChecking", "no");
-
-                session.setTimeout(15000);
-
-                session.connect();
-
-                System.out.println("SSH Session connection done.");
-
-                channel = (ChannelExec) session.openChannel("exec");
-
-                channel.setCommand(command);
-
-                System.out.println("Channel: "+channel);
-
-                ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
-
-                System.out.println("ResultStream: "+resultStream);
-
-                channel.setOutputStream(resultStream);
-
-                System.out.println("Channel: "+channel);
-
-                channel.connect();
-
-                System.out.println("Channel connection done.");
-
-                while (channel.isConnected())
-                {
-                    Thread.sleep(150);
-                }
-
-                String resultString = new String(resultStream.toByteArray());
-
-                System.out.println("ResultStream: "+resultStream);
-
-                System.out.println("ResultStream.toByteArray() : "+resultStream.toByteArray());
-
-                System.out.println("ResultString: "+resultString);
-
-                if (channel.isConnected() && session.isConnected() && !resultStream.equals(null))
-                {
-                    return true;
-                }
-
+                return true;
             }
 
-            else
-            {
-                System.out.println("Session or Channel is already connected.");
-            }
         }
 
         catch (Exception e)

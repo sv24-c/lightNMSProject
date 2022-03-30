@@ -24,7 +24,7 @@ public class PollingServlet extends HttpServlet
             JobDetail jobDetail = JobBuilder.newJob(PollingHelper.class).build();
 
             Trigger trigger = TriggerBuilder.newTrigger().withIdentity("SimpleTrigger")
-                    .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(600).repeatForever())
+                    .withSchedule(SimpleScheduleBuilder.simpleSchedule().withIntervalInSeconds(60).repeatForever())
                     .build();
 
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();

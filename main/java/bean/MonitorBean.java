@@ -8,14 +8,25 @@ import java.util.List;
  */
 public class MonitorBean
 {
-    String name;
-    String ip;
-    String type;
-    int id;
-    String availability;
+    private String name;
+    private String ip;
+    private String type;
+    private int id;
+    private String availability;
 
+    float cpu;
+    float memory;
+    float disk;
 
-    List<MonitorBean> monitorBeanList = new ArrayList<>();
+    private List<MonitorBean> monitorBeanList = new ArrayList<>();
+
+    private List<MonitorBean> matrixList = new ArrayList<>();
+
+    private List<MonitorBean> sshMatrixList = new ArrayList<>();
+
+    private List<MonitorBean> pingStatusList = new ArrayList<>();
+
+    private List<MonitorBean> sshStatusList = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -57,11 +68,67 @@ public class MonitorBean
         this.availability = availability;
     }
 
+    public float getCpu() {
+        return cpu;
+    }
+
+    public void setCpu(float cpu) {
+        this.cpu = cpu;
+    }
+
+    public float getMemory() {
+        return memory;
+    }
+
+    public void setMemory(float memory) {
+        this.memory = memory;
+    }
+
+    public float getDisk() {
+        return disk;
+    }
+
+    public void setDisk(float disk) {
+        this.disk = disk;
+    }
+
     public List<MonitorBean> getMonitorBeanList() {
         return monitorBeanList;
     }
 
     public void setMonitorBeanList(List<MonitorBean> monitorBeanList) {
         this.monitorBeanList = monitorBeanList;
+    }
+
+    public List<MonitorBean> getMatrixList() {
+        return matrixList;
+    }
+
+    public void setMatrixList(List<MonitorBean> matrixList) {
+        this.matrixList = matrixList;
+    }
+
+    public List<MonitorBean> getSshMatrixList() {
+        return sshMatrixList;
+    }
+
+    public void setSshMatrixList(List<MonitorBean> sshMatrixList) {
+        this.sshMatrixList = sshMatrixList;
+    }
+
+    public List<MonitorBean> getSshStatusList() {
+        return sshStatusList;
+    }
+
+    public void setSshStatusList(List<MonitorBean> sshStatusList) {
+        this.sshStatusList = sshStatusList;
+    }
+
+    public List<MonitorBean> getPingStatusList() {
+        return pingStatusList;
+    }
+
+    public void setPingStatusList(List<MonitorBean> pingStatusList) {
+        this.pingStatusList = pingStatusList;
     }
 }

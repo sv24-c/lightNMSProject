@@ -1,12 +1,10 @@
 package executor;
 
 import bean.MonitorBean;
-import bean.PollingBean;
 import dao.MonitorDao;
 import dao.PollingDao;
 import helper.MonitorHelper;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,7 @@ import java.util.Map;
 public class MonitorExecutor
 {
 
-    MonitorDao monitorDao = new MonitorDao();
+    private MonitorDao monitorDao = new MonitorDao();
 
     public boolean monitorPing(MonitorBean monitorBean)
     {
@@ -32,7 +30,6 @@ public class MonitorExecutor
             String type = null;
             String username = null;
             String password = null;
-            String command = "free";
             boolean pingresult;
 
             List<String> pingcommands = new ArrayList<>();
@@ -84,7 +81,7 @@ public class MonitorExecutor
             else if(pingresult && type.equals("SSH"))
             {
 
-                if (monitorHelper.ssh(username, password, ip, command))
+                if (monitorHelper.ssh(username, password, ip))
                 {
 
                     monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
@@ -176,56 +173,49 @@ public class MonitorExecutor
         return true;
     }
 
-    public boolean monitorShowAllDataInTable(PollingBean pollingBean)
+    public boolean monitorShowAllDataInCharts(MonitorBean monitorBean)
     {
         try
         {
-            List<Object> matrixList = new ArrayList<>();
 
-            List<Object> pingShowResultList = new ArrayList<>();
+            List<MonitorBean> pingShowResultList;
 
-            List<Object> sshShowResultList = new ArrayList<>();
+            List<MonitorBean> sshShowResultList;
+
+            List<MonitorBean> pingStatusList = null;
+
+            List<MonitorBean> sshShowStatusList = null;
 
             PollingDao pollingDao = new PollingDao();
 
-            MonitorBean monitorBean = new MonitorBean();
-
             System.out.println(monitorBean.getType());
-            System.out.println(pollingBean.getType());
 
             if (monitorBean.getType().equals("Ping"))
             {
-                pingShowResultList = pollingDao.getPollingPingData(pollingBean.getId());
+                pingShowResultList = pollingDao.getPollingPingData(monitorBean.getId());
 
-                for (int i = 0; i < pingShowResultList.size(); i++)
-                {
+                monitorBean.setMatrixList(pingShowResultList);
 
-                    PollingBean pollingBeanPingMatrix = new PollingBean();
+                //monitorBean.setPollingPingAvailabilityStatus(pollingDao.getPollingPingAvailabilityData(monitorBean.getId()));
 
-                    pollingBeanPingMatrix.setSendPacket((Integer) pingShowResultList.get(0));
-                    pollingBeanPingMatrix.setReceivePacket((Integer) pingShowResultList.get(1));
-                    pollingBeanPingMatrix.setPacketLoss((Integer) pingShowResultList.get(2));
-                    pollingBeanPingMatrix.setRtt((Float) pingShowResultList.get(3));
+                pingStatusList = (pollingDao.getPollingPingAvailabilityData(monitorBean.getId()));
 
-                }
+                monitorBean.setPingStatusList(pingStatusList);
+
 
                 return true;
             }
 
-            else if (pollingBean.getType().equals("Ping"))
+            else if (monitorBean.getType().equals("SSH"))
             {
 
-                sshShowResultList = pollingDao.getPollingSSHData(pollingBean.getId());
+                sshShowResultList = pollingDao.getPollingSSHData(monitorBean.getId());
 
-                for (int i = 0; i < sshShowResultList.size(); i++)
-                {
+                monitorBean.setSshMatrixList(sshShowResultList);
 
-                    PollingBean pollingBeanSSHMatrix = new PollingBean();
+                sshShowStatusList = (pollingDao.getPollingSSHAvailabilityData(monitorBean.getId()));
 
-                    pollingBeanSSHMatrix.setCpu((Float) sshShowResultList.get(0));
-                    pollingBeanSSHMatrix.setMemory((Float) sshShowResultList.get(1));
-                    pollingBeanSSHMatrix.setDisk((Float) sshShowResultList.get(2));
-                }
+                monitorBean.setSshStatusList(sshShowStatusList);
 
                 return true;
             }

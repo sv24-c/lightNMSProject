@@ -1,13 +1,8 @@
 package action;
 
 import bean.MonitorBean;
-import bean.PollingBean;
 import com.opensymphony.xwork2.ModelDriven;
-import dao.PollingDao;
 import executor.MonitorExecutor;
-import helper.MonitorHelper;
-
-import java.io.StringReader;
 
 /**
  * Created by smit on 20/3/22.
@@ -16,7 +11,7 @@ import java.io.StringReader;
 public class MonitorAction implements ModelDriven
 {
 
-    MonitorBean monitorBean = new MonitorBean();
+    private MonitorBean monitorBean = new MonitorBean();
 
     public String monitor()
     {
@@ -87,16 +82,14 @@ public class MonitorAction implements ModelDriven
         return "success";
     }
 
-    public String monitorShowInTable()
+    public String monitorShowInChart()
     {
 
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            PollingBean pollingBean = new PollingBean();
-
-            if(monitorExecutor.monitorShowAllDataInTable(pollingBean))
+            if(monitorExecutor.monitorShowAllDataInCharts(monitorBean))
             {
                 return "success";
             }

@@ -1,7 +1,5 @@
 package bean;
 
-import executor.DiscoveryExecutor;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +8,12 @@ import java.util.List;
  */
 public class DiscoveryBean
 {
-    String Name;
-    String IP;
-    String Type;
-    String Username;
-    String Password;
-    int id;
+    private String Name;
+    private String IP;
+    private String Type;
+    private String Username;
+    private String Password;
+    private int id;
 
     public int getId() {
         return id;
@@ -25,7 +23,7 @@ public class DiscoveryBean
         this.id = id;
     }
 
-    List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
+    private List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
 
     public String getName() {
         return Name;

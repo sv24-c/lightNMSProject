@@ -1,7 +1,5 @@
 package dao;
 
-import org.apache.commons.codec.binary.Base64;
-
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,7 +24,7 @@ public class MonitorDao
         }
     }
 
-    public Connection makeConnection()
+    private Connection makeConnection()
     {
         Connection con = null;
 
@@ -47,7 +45,7 @@ public class MonitorDao
         return con;
     }
 
-    public void closeConnection(PreparedStatement preparedStatement, Connection connection)
+    private void closeConnection(PreparedStatement preparedStatement, Connection connection)
     {
         try
         {

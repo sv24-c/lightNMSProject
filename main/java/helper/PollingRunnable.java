@@ -21,15 +21,13 @@ public class PollingRunnable
 
     String type = null;
 
-    String command = null;
-
     String username = null;
 
     String password = null;
 
     int id = 0;
 
-    ExecutorService executorService = Executors.newFixedThreadPool(5);
+    ExecutorService executorService = Executors.newFixedThreadPool(8);
 
     /*public PollingRunnable(String ip) {
     }*/

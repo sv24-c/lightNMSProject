@@ -3,10 +3,7 @@ package dao;
 import org.apache.commons.codec.binary.Base64;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by smit on 12/3/22.
@@ -26,7 +23,7 @@ public class DiscoveryDao
         }
     }
 
-    public Connection makeConnection()
+    private Connection makeConnection()
     {
         Connection con = null;
 
@@ -47,7 +44,7 @@ public class DiscoveryDao
         return con;
     }
 
-    public void closeConnection(PreparedStatement preparedStatement, Connection connection)
+    private void closeConnection(PreparedStatement preparedStatement, Connection connection)
     {
         try
         {
@@ -117,7 +114,7 @@ public class DiscoveryDao
         {
             System.out.println(e.getMessage());
 
-            System.out.println(e.getStackTrace());
+            System.out.println(Arrays.toString(e.getStackTrace()));
 
         }
 
@@ -137,7 +134,7 @@ public class DiscoveryDao
 
         PreparedStatement preparedStatement = null;
 
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = new ArrayList<>();
 
         try
         {
@@ -206,7 +203,7 @@ public class DiscoveryDao
 
         PreparedStatement preparedStatement = null;
 
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = new ArrayList<>();
 
         try
         {
@@ -226,7 +223,7 @@ public class DiscoveryDao
 
                 while (resultSet.next()) {
 
-                    Map<String, Object> map = new LinkedHashMap<String, Object>();
+                    Map<String, Object> map = new LinkedHashMap<>();
 
                     System.out.println("New LinkedHashMap has created ");
 
@@ -324,7 +321,7 @@ public class DiscoveryDao
         return uname;
     }
 
-    public String discoveryUpdateData(String name, String ip, String username, String password, int id)
+    public void discoveryUpdateData(String name, String ip, String username, String password, int id)
     {
         Connection con = null;
 
@@ -368,7 +365,7 @@ public class DiscoveryDao
         {
             System.out.println(e.getMessage());
 
-            System.out.println(e.getStackTrace());
+            System.out.println(Arrays.toString(e.getStackTrace()));
 
         }
 
@@ -377,10 +374,9 @@ public class DiscoveryDao
             closeConnection(preparedStatementOfUpdate, con);
         }
 
-        return null;
     }
 
-    public String discoveryDeleteData(int id)
+    public void discoveryDeleteData(int id)
     {
         Connection con = null;
 
@@ -412,7 +408,7 @@ public class DiscoveryDao
         {
             System.out.println(e.getMessage());
 
-            System.out.println(e.getStackTrace());
+            System.out.println(Arrays.toString(e.getStackTrace()));
 
         }
 
@@ -421,6 +417,5 @@ public class DiscoveryDao
             closeConnection(preparedStatementOfDelete, con);
         }
 
-        return null;
     }
 }

@@ -12,15 +12,13 @@ import java.util.Map;
  */
 public class DiscoveryExecutor
 {
-    DiscoveryDao discoveryDao = new DiscoveryDao();
+    private DiscoveryDao discoveryDao = new DiscoveryDao();
 
     public boolean discoveryShowData(DiscoveryBean discoveryBean)
     {
 
         try
         {
-
-            DiscoveryDao discoveryDao = new DiscoveryDao();
 
             List<Map<String, Object>> list;
 
@@ -57,9 +55,10 @@ public class DiscoveryExecutor
 
     public boolean discoveryGetUsernameData(DiscoveryBean discoveryBean)
     {
+        DiscoveryDao discoveryDao = new DiscoveryDao();
+
         try
         {
-            //new DiscoveryDao().discoveryGetUsernameDaoData(discoveryBean.getId());
 
           discoveryBean.setUsername(discoveryDao.discoveryGetUsernameDaoData(discoveryBean.getId()));
         }
@@ -78,13 +77,15 @@ public class DiscoveryExecutor
         try
         {
 
-            DiscoveryDao discoveryDao = new DiscoveryDao();
-
             List<Map<String, Object>> list;
 
-            list = new DiscoveryDao().discoveryCheckRedundantData(discoveryBean.getIP(), discoveryBean.getType());
+            new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
 
-            if (list.isEmpty())
+            return true;
+
+            /*list = discoveryDao.discoveryCheckRedundantData(discoveryBean.getIP(), discoveryBean.getType());
+
+            if (!list.isEmpty())
             {
                 new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
 
@@ -92,8 +93,8 @@ public class DiscoveryExecutor
             }
             else
             {
-                return true;
-            }
+                return false;
+            }*/
         }
 
         catch (Exception e)

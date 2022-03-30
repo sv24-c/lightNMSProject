@@ -46,6 +46,10 @@ public class PollingPingSSH implements Runnable
     String ip;
     String type;
 
+    double cpu;
+    double usedMemory;
+    float disk;
+
     /*public PollingPingSSH(String username, String password, String ip, int id) {
         super();
     }*/
@@ -81,17 +85,21 @@ public class PollingPingSSH implements Runnable
 
             float rtt = (float) pingExecuteResult.get(3);
 
-            if (packetLoss < 20)
+            if (packetLoss <= 20)
             {
-                pollingDao.pollingPingInsertInDataBase(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp);
-
                 monitorDao.monitorAvailabilityUpdate(availability, id);
+
+                pollingDao.pollingPingInsertInDataBase(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp, availability);
+
             }
             else if (packetLoss ==100)
             {
                 String availabilityStatus = "Down";
 
                 monitorDao.monitorAvailabilityUpdate(availabilityStatus, id);
+
+                pollingDao.pollingPingInsertInDataBase(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp, availabilityStatus);
+
             }
 
 
@@ -105,7 +113,7 @@ public class PollingPingSSH implements Runnable
 
             int packetLoss = (int) pingExecuteResult.get(2);
 
-            if (packetLoss < 25)
+            if (packetLoss <= 20)
             {
 
                 commandList.add("mpstat | grep all\n");
@@ -114,55 +122,68 @@ public class PollingPingSSH implements Runnable
 
                 commandList.add("df -ht ext4 | grep / | awk '{print $5}'\n");
 
+                //commandList.add("free -m | grep Swap | awk '{print $4}'\n");
+
                 commandList.add("exit\n");
 
                 //commandList.add("uptime");
 
                 sshExecuteResult = ssh(username, password, ip, commandList);
 
+                System.out.println(sshExecuteResult);
+
                 if(!sshExecuteResult.isEmpty())
                 {
                     //sshExecuteResult = ssh(username, password, ip, commandList);
 
-                    String cp = (String) sshExecuteResult.get(1);
+                    String cp = (String) sshExecuteResult.get(5);
 
-                        String[] cpuResult = cp.split(" ");
+                    String[] cpuResult = cp.split(" ");
 
-                    double cpu = Double.parseDouble(cpuResult[cpuResult.length -1]);
+                    cpu = Double.parseDouble(cpuResult[cpuResult.length -1]);
 
-                    String memo = (String) sshExecuteResult.get(3);
+                    String memo = (String) sshExecuteResult.get(7);
 
-                    double usedMemory = Double.parseDouble(memo);
+                    usedMemory = Double.parseDouble(memo);
                         /*String[] memoryResult = memo.split(" ");
                         double usedMemory = Double.parseDouble(memoryResult[memoryResult.length - 2]);*/
 
-                    String dis = (String) sshExecuteResult.get(5);
+                    String dis = (String) sshExecuteResult.get(9);
 
                         //float disk = Float.parseFloat(dis);
-                        float disk = Float.parseFloat(dis.substring(dis.indexOf(0)+1, dis.indexOf("%")));
+                    disk = Float.parseFloat(dis.substring(dis.indexOf(0)+1, dis.indexOf("%")));
 
-                    pollingDao.pollingSSHInsertInDataBase(id, ip, cpu, usedMemory, disk, timestamp);
+                    pollingDao.pollingSSHInsertInDataBase(id, ip, cpu, usedMemory, disk, timestamp, availability);
 
                     monitorDao.monitorAvailabilityUpdate(availability, id);
 
                 }
 
             }
-            else
+            else if (packetLoss == 100)
             {
                 String availabilityStatus = "Down";
 
                 monitorDao.monitorAvailabilityUpdate(availabilityStatus, id);
 
+                cpu = 0;
+
+                usedMemory = 0;
+
+                disk = 0;
+
+                pollingDao.pollingSSHInsertInDataBase(id, ip, cpu, usedMemory, disk, timestamp, availabilityStatus);
+
                 System.out.println("ping ssh is not done");
+            }
+            else
+            {
+                System.out.println("Unable to ping");
             }
         }
 
         else
         {
-           /* String availability = "Down";
-
-            monitorDao.monitorAvailabilityUpdate(availability, id);*/
 
             System.out.println("Make sure type should be appropriate");
         }

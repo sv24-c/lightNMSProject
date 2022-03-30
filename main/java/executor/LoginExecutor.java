@@ -1,12 +1,6 @@
 package executor;
 
 import dao.LoginDao;
-import action.LoginAction;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,18 +11,22 @@ public class LoginExecutor
 {
 
 
-    LoginDao loginDao = new LoginDao();
+    private LoginDao loginDao = new LoginDao();
 
     public boolean login(String userName, String password)
     {
 
-        List<Map<String, Object>> list = new ArrayList<>();
+        List<Map<String, Object>> list;
 
         list = loginDao.logIn(userName, password);
 
         //Map<String, Object> mapData = list.get(0);
 
         Map<String, Object> mapData = null;
+
+        String uname = null;
+
+        String pass = null;
 
         try
         {
@@ -37,18 +35,19 @@ public class LoginExecutor
                 mapData = list.get(0);
             }
 
-            String uname = String.valueOf(mapData.get("UserName"));
-
-            String pass = String.valueOf(mapData.get("Password"));
-
-            if(uname.equals(userName) && pass.equals(password))
+            if (mapData != null)
             {
-               return true;
+                uname = String.valueOf(mapData.get("UserName"));
             }
 
-            else
+            if (mapData != null)
             {
-                return false;
+                pass = String.valueOf(mapData.get("Password"));
+            }
+
+            if (uname != null)
+            {
+                return uname.equals(userName) && pass.equals(password);
             }
 
         }
