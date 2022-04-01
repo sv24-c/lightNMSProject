@@ -6,6 +6,7 @@ import executor.LoginExecutor;
 public class LoginAction
 {
     private String userName;
+
     private String password;
 
     private LoginExecutor loginExecutor = new LoginExecutor();
@@ -54,5 +55,6 @@ public class LoginAction
 
         return "failure";
     }
+
 }
 

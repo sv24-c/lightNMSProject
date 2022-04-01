@@ -7,6 +7,18 @@
 
     <!--<constant name="struts.devMode" value="true" />-->
 
+    <!--<package name="Start" namespace="/" extends="struts-default">
+        
+        <interceptors>
+            <interceptor name="userSession" class=""></interceptor>
+        </interceptors>
+        
+        <action name="">
+            <interceptor-ref name="userSession"/>
+            <result>login.jsp</result>
+        </action>
+    </package>-->
+
     <package name="default" extends="struts-default">
 
         <result-types>
@@ -30,8 +42,10 @@
             <result>login.jsp</result>
         </action>
 
-        <action name="DashboardClick">
-            <result>/WEB-INF/index.jsp</result>
+        <action name="dashboardClick" class="action.DashboardAction" method="dashboardData">
+            <result name="success" type="json"></result>
+            <result name="failure">login.jsp</result>
+
         </action>
 
         <action name="discoveryProcess" class="action.DiscoveryAction" method="discovery">
@@ -74,7 +88,7 @@
             <result name="failure">login.jsp</result>
         </action>
 
-        <action name="monitorShowTableProcess" class="action.MonitorAction" method="monitorShowInTable">
+        <action name="monitorShowTableProcess" class="action.MonitorAction" method="monitorShowInChart">
             <result name="success" type="json"></result>
             <result name="failure">login.jsp</result>
         </action>

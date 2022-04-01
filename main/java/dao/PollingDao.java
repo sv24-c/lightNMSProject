@@ -2,8 +2,7 @@ package dao;
 
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by smit on 27/3/22.
@@ -127,7 +126,7 @@ public class PollingDao
         return null;
     }
 
-    public String pollingSSHInsertInDataBase(int id, String ip, double cpu, double memory, float disk, Timestamp time, String status)
+    public String pollingSSHInsertInDataBase(int id, String ip, double cpu, double memory, float disk, Timestamp time, String status, float swapMemory)
     {
         Connection con = null;
 
@@ -139,7 +138,7 @@ public class PollingDao
 
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("INSERT INTO SSHPolling (Id, IP, CPU, Memory, Disk, PollingTime, Status) VALUES(?,?,?,?,?,?,?)");
+                preparedStatementOfInsert = con.prepareStatement("INSERT INTO SSHPolling (Id, IP, CPU, Memory, Disk, PollingTime, Status, SwapMemory) VALUES(?,?,?,?,?,?,?,?)");
 
                 preparedStatementOfInsert.setInt(1, id);
 
@@ -154,6 +153,8 @@ public class PollingDao
                 preparedStatementOfInsert.setTimestamp(6, time);
 
                 preparedStatementOfInsert.setString(7, status);
+
+                preparedStatementOfInsert.setFloat(8, swapMemory);
 
                 int result = preparedStatementOfInsert.executeUpdate();
 
@@ -478,6 +479,8 @@ public class PollingDao
 
         float memory = 0;
 
+        float swapMemory = 0;
+
         float disk = 0;
 
         Timestamp sshTimestamp = null;
@@ -494,7 +497,7 @@ public class PollingDao
 
             if ( con != null) {
 
-                preparedStatement = con.prepareStatement("select CPU, Memory, Disk, PollingTime FROM SSHPolling s1 WHERE Id=? and PollingTime = (select max(PollingTime) from SSHPolling s2 where s1.Id = s2.Id)");
+                preparedStatement = con.prepareStatement("select CPU, Memory, Disk, SwapMemory, PollingTime  FROM SSHPolling s1 WHERE Id=? and PollingTime = (select max(PollingTime) from SSHPolling s2 where s1.Id = s2.Id)");
 
                 System.out.println("Prepared statement created successfully");
 
@@ -510,7 +513,9 @@ public class PollingDao
 
                     disk = resultSet.getFloat(3);
 
-                    sshTimestamp = resultSet.getTimestamp(4);
+                    swapMemory  =resultSet.getFloat(4);
+
+                    sshTimestamp = resultSet.getTimestamp(5);
 
                 }
 
@@ -518,6 +523,7 @@ public class PollingDao
                 list.add(cpu);
                 list.add(memory);
                 list.add(disk);
+                list.add(swapMemory);
                 list.add(sshTimestamp);
             }
 
@@ -545,5 +551,137 @@ public class PollingDao
         }
 
         return list;
+    }
+
+    public Map getPollingPingRttData(int id)
+    {
+        Map<Timestamp, Float> mapofRtt = new LinkedHashMap<>();
+
+        float rtt = 0;
+
+        Timestamp sshTimestamp = null;
+
+        ResultSet resultSet;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null) {
+
+                preparedStatement = con.prepareStatement("SELECT RTT, PollingTime FROM PingPolling where Id=? ORDER BY PollingTime DESC LIMIT 10;");
+
+                System.out.println("Prepared statement created successfully");
+
+                preparedStatement.setInt(1, id);
+
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next())
+                {
+
+                    rtt = resultSet.getFloat(1);
+
+                    sshTimestamp = resultSet.getTimestamp(2);
+
+                    mapofRtt.put(sshTimestamp, rtt);
+                }
+
+            }
+
+            else
+            {
+                System.out.println("Connection is not established");
+            }
+
+        }
+
+        catch (SQLException e)
+        {
+
+            System.out.println("SQL State: "+ e.getSQLState());
+
+            System.out.println("Error Code "+ e.getErrorCode());
+
+            System.out.println(e.getMessage());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatement, con);
+        }
+
+        return mapofRtt;
+    }
+
+    public Map getPollingSSHCpuData(int id)
+    {
+        Map<Timestamp, Float> map = new LinkedHashMap<>();
+
+        float cpu = 0;
+
+        Timestamp sshTimestamp = null;
+
+        ResultSet resultSet;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        try
+        {
+            con = makeConnection();
+
+            if ( con != null) {
+
+                preparedStatement = con.prepareStatement("SELECT CPU, PollingTime FROM SSHPolling where Id=? ORDER BY PollingTime DESC LIMIT 10;");
+
+                System.out.println("Prepared statement created successfully");
+
+                preparedStatement.setInt(1, id);
+
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next())
+                {
+
+                    cpu = resultSet.getFloat(1);
+
+                    sshTimestamp = resultSet.getTimestamp(2);
+
+                    map.put(sshTimestamp, cpu);
+                }
+
+            }
+
+            else
+            {
+                System.out.println("Connection is not established");
+            }
+
+        }
+
+        catch (SQLException e)
+        {
+
+            System.out.println("SQL State: "+ e.getSQLState());
+
+            System.out.println("Error Code "+ e.getErrorCode());
+
+            System.out.println(e.getMessage());
+
+        }
+
+        finally
+        {
+            closeConnection(preparedStatement, con);
+        }
+
+        return map;
     }
 }

@@ -5,7 +5,9 @@ import dao.MonitorDao;
 import dao.PollingDao;
 import helper.MonitorHelper;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -178,13 +180,17 @@ public class MonitorExecutor
         try
         {
 
-            List<MonitorBean> pingShowResultList;
+            List<Object> pingShowResultList;
 
-            List<MonitorBean> sshShowResultList;
+            List<Object> sshShowResultList;
 
-            List<MonitorBean> pingStatusList = null;
+            List<Integer> pingStatusList = null;
 
-            List<MonitorBean> sshShowStatusList = null;
+            List<Integer> sshShowStatusList = null;
+
+            Map<Timestamp, Float> map;
+
+            Map<Timestamp, Float> mapofRtt;
 
             PollingDao pollingDao = new PollingDao();
 
@@ -202,6 +208,9 @@ public class MonitorExecutor
 
                 monitorBean.setPingStatusList(pingStatusList);
 
+                mapofRtt = pollingDao.getPollingPingRttData(monitorBean.getId());
+
+                monitorBean.setRttMap(mapofRtt);
 
                 return true;
             }
@@ -216,6 +225,10 @@ public class MonitorExecutor
                 sshShowStatusList = (pollingDao.getPollingSSHAvailabilityData(monitorBean.getId()));
 
                 monitorBean.setSshStatusList(sshShowStatusList);
+
+                map = pollingDao.getPollingSSHCpuData(monitorBean.getId());
+
+                monitorBean.setCpuMap(map);
 
                 return true;
             }

@@ -1,7 +1,12 @@
 package bean;
 
+import com.sun.org.apache.bcel.internal.generic.FLOAD;
+
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by smit on 20/3/22.
@@ -20,13 +25,17 @@ public class MonitorBean
 
     private List<MonitorBean> monitorBeanList = new ArrayList<>();
 
-    private List<MonitorBean> matrixList = new ArrayList<>();
+    private List<Object> matrixList = new ArrayList<>();
 
-    private List<MonitorBean> sshMatrixList = new ArrayList<>();
+    private List<Object> sshMatrixList = new ArrayList<>();
 
-    private List<MonitorBean> pingStatusList = new ArrayList<>();
+    private List<Integer> pingStatusList = new ArrayList<>();
 
-    private List<MonitorBean> sshStatusList = new ArrayList<>();
+    private List<Integer> sshStatusList = new ArrayList<>();
+
+    private Map<Timestamp, Float> cpuMap = new LinkedHashMap<>();
+
+    private Map<Timestamp, Float> rttMap = new LinkedHashMap<>();
 
     public String getName() {
         return name;
@@ -100,35 +109,51 @@ public class MonitorBean
         this.monitorBeanList = monitorBeanList;
     }
 
-    public List<MonitorBean> getMatrixList() {
+    public List<Object> getMatrixList() {
         return matrixList;
     }
 
-    public void setMatrixList(List<MonitorBean> matrixList) {
+    public void setMatrixList(List<Object> matrixList) {
         this.matrixList = matrixList;
     }
 
-    public List<MonitorBean> getSshMatrixList() {
+    public List<Object> getSshMatrixList() {
         return sshMatrixList;
     }
 
-    public void setSshMatrixList(List<MonitorBean> sshMatrixList) {
+    public void setSshMatrixList(List<Object> sshMatrixList) {
         this.sshMatrixList = sshMatrixList;
     }
 
-    public List<MonitorBean> getSshStatusList() {
+    public List<Integer> getSshStatusList() {
         return sshStatusList;
     }
 
-    public void setSshStatusList(List<MonitorBean> sshStatusList) {
+    public void setSshStatusList(List<Integer> sshStatusList) {
         this.sshStatusList = sshStatusList;
     }
 
-    public List<MonitorBean> getPingStatusList() {
+    public List<Integer> getPingStatusList() {
         return pingStatusList;
     }
 
-    public void setPingStatusList(List<MonitorBean> pingStatusList) {
+    public void setPingStatusList(List<Integer> pingStatusList) {
         this.pingStatusList = pingStatusList;
+    }
+
+    public Map<Timestamp, Float> getCpuMap() {
+        return cpuMap;
+    }
+
+    public void setCpuMap(Map<Timestamp, Float> cpuMap) {
+        this.cpuMap = cpuMap;
+    }
+
+    public Map<Timestamp, Float> getRttMap() {
+        return rttMap;
+    }
+
+    public void setRttMap(Map<Timestamp, Float> rttMap) {
+        this.rttMap = rttMap;
     }
 }
