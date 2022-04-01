@@ -14,7 +14,7 @@ var discoveryVariable = {
         $("#discovery-onclick").on("click", function ()
         {
 
-            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery table</h4>   <button type="submit" class="btn btn-primary me-2" id="dis-add-btn" onclick="discoveryClickButton()">Add</button>     <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> </tr> </thead> <tbody id="tablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
+            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery Grid</h4>   <button type="submit" class="btn btn-primary me-2" id="dis-add-btn" onclick="discoveryClickButton()">Add</button>     <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> </tr> </thead> <tbody id="tablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
 
             $.ajax({
                 type: "POST",
@@ -58,7 +58,7 @@ var discoveryVariable = {
         $("#monitor-onclick").on("click", function ()
         {
 
-            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery table</h4> <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Availability </th> <th> Operation </th></tr> </thead> <tbody id="monitortablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
+            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Monitor Grid</h4> <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Availability </th> <th> Operation </th></tr> </thead> <tbody id="monitortablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
 
             $.ajax({
                 type: "POST",
@@ -89,6 +89,24 @@ var discoveryVariable = {
                 }
             });
         });
+    },
+
+    showDashboard : function () {
+
+            $.ajax({
+                type: "POST",
+                url:"dashboardClick",
+                success: function (data)
+                {
+                    $("#upCount").find("p").text(data.dashboardList[0]);
+                    $("#downCount").find("p").text(data.dashboardList[1]);
+                    $("#unknownCount").find("p").text(data.dashboardList[2]);
+                },
+                error: function ()
+                {
+                    alert("Something went Wrong");
+                }
+            });
     }
 
 };
@@ -330,152 +348,22 @@ function deleteMonitor(that)
 
 function showMonitor(that)
 {
-    //$("#overview").html('<div class="col-lg-4 d-flex flex-column"> <div class="row flex-grow"> <div class="col-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> </div> </div> </div> </div> </div>');
-    //$("#overview").html('<div class="row flex-grow"> <div class="col-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div class="row"> <div class="col-lg-12"> <div class="d-flex justify-content-between align-items-center mb-3"> <h4 class="card-title card-title-dash">Type By Amount</h4> </div> <canvas class="my-auto" id="doughnutChart" height="200"></canvas> <div id="doughnut-chart-legend" class="mt-5 text-center"    ></div> </div> </div> </div> </div> </div> </div> ');
-    //$("#overview").html('<div class="row flex-grow"> <div class="col-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div class="row"> <div class="col-lg-12"><div class="chartjs-size-monitor"><div class="chartjs-size-monitor-expand"><div class=""></div></div><div class="chartjs-size-monitor-shrink"><div class=""></div></div></div> <div class="d-flex justify-content-between align-items-center mb-3"> <h4 class="card-title card-title-dash">Type By Amount</h4> </div> <canvas class="my-auto chartjs-render-monitor" id="doughnutChart" height="613" style="display: block; width: 200px; height: 300px;" width="300"></canvas> <div id="doughnut-chart-legend" class="mt-5 text-center"><div class="chartjs-legend"><ul class="justify-content-center"><li><span style="background-color:#1F3BB3"></span>Total</li><li><span style="background-color:#FDD0C7"></span>Net</li><li><span style="background-color:#52CDFF"></span>Gross</li><li><span style="background-color:#81DADA"></span>AVG</li></ul></div></div> </div> </div> </div> </div> </div> </div> ');
-
-
-   /* if ($("#doughnutChart").length) {
-        var doughnutChartCanvas = $("#doughnutChart").get(0).getContext("2d");
-        var doughnutChart = new Chart(doughnutChartCanvas, {
-            type: 'doughnut',
-            data: doughnutPieData,
-            options: doughnutPieOptions
-        });
-    }*/
-
-   /* if ($("#doughnutChart").length) {
-        var doughnutChartCanvas = $("#doughnutChart").get(0).getContext("2d");
-        var doughnutPieData = {
-            datasets: [{
-                data: [40, 20, 30, 10],
-                backgroundColor: [
-                    "#1F3BB3",
-                    "#FDD0C7",
-                    "#52CDFF",
-                    "#81DADA"
-                ],
-                borderColor: [
-                    "#1F3BB3",
-                    "#FDD0C7",
-                    "#52CDFF",
-                    "#81DADA"
-                ],
-            }],
-
-            // These labels appear in the legend and in the tooltips when hovering different arcs
-            labels: [
-                'Total',
-                'Net',
-                'Gross',
-                'AVG',
-            ]
-        };
-        var doughnutPieOptions = {
-            cutoutPercentage: 50,
-            animationEasing: "easeOutBounce",
-            animateRotate: true,
-            animateScale: false,
-            responsive: true,
-            maintainAspectRatio: true,
-            showScale: true,
-            legend: false,
-            legendCallback: function (chart) {
-                var text = [];
-                text.push('<div class="chartjs-legend"><ul class="justify-content-center">');
-                for (var i = 0; i < chart.data.datasets[0].data.length; i++) {
-                    text.push('<li><span style="background-color:' + chart.data.datasets[0].backgroundColor[i] + '">');
-                    text.push('</span>');
-                    if (chart.data.labels[i]) {
-                        text.push(chart.data.labels[i]);
-                    }
-                    text.push('</li>');
-                }
-                text.push('</div></ul>');
-                return text.join("");
-            },
-
-            layout: {
-                padding: {
-                    left: 0,
-                    right: 0,
-                    top: 0,
-                    bottom: 0
-                }
-            },
-            tooltips: {
-                callbacks: {
-                    title: function(tooltipItem, data) {
-                        return data['labels'][tooltipItem[0]['index']];
-                    },
-                    label: function(tooltipItem, data) {
-                        return data['datasets'][0]['data'][tooltipItem['index']];
-                    }
-                },
-
-                backgroundColor: '#fff',
-                titleFontSize: 14,
-                titleFontColor: '#0B0F32',
-                bodyFontColor: '#737F8B',
-                bodyFontSize: 11,
-                displayColors: false
-            }
-        };
-        var doughnutChart = new Chart(doughnutChartCanvas, {
-            type: 'doughnut',
-            data: doughnutPieData,
-            options: doughnutPieOptions
-        });
-        document.getElementById('doughnut-chart-legend').innerHTML = doughnutChart.generateLegend();
-    }*/
 
     var type = $(that).data("value");
+
     var id = $(that).data("id");
+
     ip = $(that).parent().prev().prev().prev().text();
 
     if(type === "Ping")
    {
-       $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div> <br><br> <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"><div id="chartContainerPartTwo" style="height: 300px; width: 100%;"></div></div></div>  <br><br><br>      <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="packetLoss" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Packet Loss(%)<hr><p style="font-size: 25px"></p></div>    <div id="rtt" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">RTT(ms)<hr><p style="font-size: 25px"> </p> </div><div id="ReceivePacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Receive Packet<hr><p style="font-size: 25px"> </p> </div><div id="SendPacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Send Packet<hr><p style="font-size: 25px"> </p></div>    </div>  </div></div>    ');
-
-
+       $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div> <br><br> <div class="row"><div id="pingchartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"><div id="pingchartContainerPartTwo" style="height: 300px; width: 100%;"></div></div></div>  <br><br><br>      <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="packetLoss" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Packet Loss(%)<hr><p style="font-size: 25px"></p></div>    <div id="rtt" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">RTT(ms)<hr><p style="font-size: 25px"> </p> </div><div id="ReceivePacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Receive Packet<hr><p style="font-size: 25px"> </p> </div><div id="SendPacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Send Packet<hr><p style="font-size: 25px"> </p></div>    </div>  </div></div>    ');
 
        var up = 0;
        var down = 0;
-
-       var chart = new CanvasJS.Chart("chartContainerPartTwo", {
-           animationEnabled: true,
-           exportEnabled: true,
-           theme: "light1", // "light1", "light2", "dark1", "dark2"
-           title:{
-               text: "Simple Column Chart with Index Labels"
-           },
-           axisY: {
-               includeZero: true
-           },
-           data: [{
-               type: "column", //change type to bar, line, area, pie, etc
-               //indexLabel: "{y}", //Shows y value on all Data Points
-               indexLabelFontColor: "#5A5757",
-               indexLabelFontSize: 16,
-               indexLabelPlacement: "outside",
-               dataPoints: [
-                   { x: 10, y: 71 },
-                   { x: 20, y: 55 },
-                   { x: 30, y: 50 },
-                   { x: 40, y: 65 },
-                   { x: 50, y: 92, indexLabel: "\u2605 Highest" },
-                   { x: 60, y: 68 },
-                   { x: 70, y: 38 },
-                   { x: 80, y: 71 },
-                   { x: 90, y: 54 },
-                   { x: 100, y: 60 },
-                   { x: 110, y: 36 },
-                   { x: 120, y: 49 },
-                   { x: 130, y: 21, indexLabel: "\u2691 Lowest" }
-               ]
-           }]
-       });
-       chart.render();
+       var rtt = 0;
+       var rttTimeStamp = 0;
+       var rttList = [];
 
        $.ajax({
            type: "POST",
@@ -490,7 +378,7 @@ function showMonitor(that)
                up = data.pingStatusList[0];
                down = data.pingStatusList[1];
 
-               var chart = new CanvasJS.Chart("chartContainer", {
+               var chart = new CanvasJS.Chart("pingchartContainer", {
                    animationEnabled: true,
                    title:{
                        text: "Availability of last 24 Hour",
@@ -511,6 +399,46 @@ function showMonitor(that)
                });
                chart.render();
 
+                $.each(data.rttMap, function (key, value) {
+
+                rttTimeStamp = key;
+                rtt = value;
+
+                rttList.push({
+                 label: rttTimeStamp,
+                 y: rtt
+                });
+
+                });
+
+               var rttchart = new CanvasJS.Chart("pingchartContainerPartTwo", {
+                   animationEnabled: true,
+                   exportEnabled: true,
+                   theme: "light1", // "light1", "light2", "dark1", "dark2"
+                   title:{
+                       text: "Last 24 Hour RTT Chart"
+                   },
+                   axisX: {
+                       title: "RTT per TimeStamp",
+                   },
+                   axisY: {
+                       title: "Total RTT",
+                       minimum: 0,
+                       maximum: 20,
+                       suffix: "ms",
+                       includeZero: true
+                   },
+                   data: [{
+                       type: "column", //change type to bar, line, area, pie, etc
+                       //indexLabel: "{y}", //Shows y value on all Data Points
+                       indexLabelFontColor: "#5A5757",
+                       indexLabelFontSize: 16,
+                       indexLabelPlacement: "outside",
+                       dataPoints: rttList
+                   }]
+               });
+               rttchart.render();
+
            },
            error: function ()
            {
@@ -522,46 +450,16 @@ function showMonitor(that)
 
    else if(type === "SSH")
    {
-       $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div><br><br>   <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"> </div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"> <div id="chartContainerPartTwo" style="height: 300px; width: 100%;"></div> </div></div>  <br><br><br>   <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="cpu" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px; padding: 10px">CPU(%)<hr><p style="font-size: 25px"></p></div>    <div id="disk" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Disk(%)<hr><p style="font-size: 25px"></p> </div><div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Memory(MB)<hr><p style="font-size: 25px"></p></div>  <div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Swap Memory(MB)<hr><p style="font-size: 25px"></p></div>  </div>  </div></div>  ');
+       $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div><br><br>   <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"> </div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"> <div id="columnChartContainer" style="height: 300px; width: 100%;"></div> </div></div>  <br><br><br>   <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="cpu" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px; padding: 10px">CPU(%)<hr><p style="font-size: 25px"></p></div>    <div id="disk" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Disk(%)<hr><p style="font-size: 25px"></p> </div><div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Memory(MB)<hr><p style="font-size: 25px"></p></div>  <div id="swapMemory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Swap Memory(MB)<hr><p style="font-size: 25px"></p></div>  </div>  </div></div>  ');
 
 
        var up = 0;
        var down = 0;
 
-       var chart = new CanvasJS.Chart("chartContainerPartTwo", {
-           animationEnabled: true,
-           exportEnabled: true,
-           theme: "light1", // "light1", "light2", "dark1", "dark2"
-           title:{
-               text: "Simple Column Chart with Index Labels"
-           },
-           axisY: {
-               includeZero: true
-           },
-           data: [{
-               type: "column", //change type to bar, line, area, pie, etc
-               //indexLabel: "{y}", //Shows y value on all Data Points
-               indexLabelFontColor: "#5A5757",
-               indexLabelFontSize: 16,
-               indexLabelPlacement: "outside",
-               dataPoints: [
-                   { x: 10, y: 71 },
-                   { x: 20, y: 55 },
-                   { x: 30, y: 50 },
-                   { x: 40, y: 65 },
-                   { x: 50, y: 92, indexLabel: "\u2605 Highest" },
-                   { x: 60, y: 68 },
-                   { x: 70, y: 38 },
-                   { x: 80, y: 71 },
-                   { x: 90, y: 54 },
-                   { x: 100, y: 60 },
-                   { x: 110, y: 36 },
-                   { x: 120, y: 49 },
-                   { x: 130, y: 21, indexLabel: "\u2691 Lowest" }
-               ]
-           }]
-       });
-       chart.render();
+       var columnChart;
+       var cpuUsed = 0;
+       var timeStamp = 0;
+       var list = [];
 
        $.ajax({
            type: "POST",
@@ -572,6 +470,7 @@ function showMonitor(that)
                $("#cpu p").text(data.sshMatrixList[0]);
                $("#disk p").text(data.sshMatrixList[2]);
                $("#memory p").text(data.sshMatrixList[1]);
+               $("#swapMemory p").text(data.sshMatrixList[3]);
                up = data.sshStatusList[0];
                down = data.sshStatusList[1];
 
@@ -598,6 +497,49 @@ function showMonitor(that)
                });
                chart.render();
 
+               $.each(data.cpuMap, function (key, value) {
+
+                   timeStamp = key;
+                   cpuUsed = value;
+
+                   list.push({
+                       label: timeStamp,
+                       y: cpuUsed
+                   });
+
+                });
+
+               columnChart = new CanvasJS.Chart("columnChartContainer", {
+                   animationEnabled: true,
+                   exportEnabled: true,
+                   theme: "light1", // "light1", "light2", "dark1", "dark2"
+                   title:{
+                       text: "Last 24 Hour CPU Usage Chart"
+                   },
+                   axisX: {
+                       title: "CPU Usage per TimeStamp",
+                       valueFormatString: '##.##'
+                   },
+                   axisY: {
+                       title: "Total CPU",
+                       minimum: 0,
+                       maximum: 100,
+                       suffix: "%",
+                       includeZero: true
+                   },
+                   data: [{
+                       type: "column", //change type to bar, line, area, pie, etc
+                       indexLabel: "{y}", //Shows y value on all Data Points
+                       indexLabelFontColor: "#5A5757",
+                       indexLabelFontSize: 16,
+                       indexLabelPlacement: "outside",
+
+                       dataPoints: list
+                   }]
+
+               });
+
+               columnChart.render();
            },
            error: function ()
            {
