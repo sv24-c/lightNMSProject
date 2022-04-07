@@ -35,15 +35,40 @@ public class LoginExecutor
                 mapData = list.get(0);
             }
 
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
             if (mapData != null)
             {
                 uname = String.valueOf(mapData.get("UserName"));
             }
 
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
             if (mapData != null)
             {
                 pass = String.valueOf(mapData.get("Password"));
             }
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        try
+        {
 
             if (uname != null)
             {
@@ -55,7 +80,6 @@ public class LoginExecutor
         {
             e.printStackTrace();
         }
-
         return false;
     }
 }

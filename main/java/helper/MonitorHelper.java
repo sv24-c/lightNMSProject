@@ -5,8 +5,6 @@ import com.jcraft.jsch.JSch;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -22,15 +20,13 @@ public class MonitorHelper
 
         String packetdata = "";
 
-        String s = "";
+        String result = "";
 
         ProcessBuilder processBuilder;
 
         Process process = null;
 
         BufferedReader reader = null;
-
-        BufferedReader error = null;
 
         try
         {
@@ -44,35 +40,22 @@ public class MonitorHelper
 
                 reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-                error = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-
-                System.out.println("Result for Command ping.");
-
-                while ((s = reader.readLine()) != null)
+                while ((result = reader.readLine()) != null)
                 {
-                    packetdata+=s;
-
-                    System.out.println(s);
+                    packetdata+=result;
 
                 }
 
-                while ((s = error.readLine()) != null)
+                if (!packetdata.isEmpty())
                 {
-                    System.out.println("Error for Command ping."+s);
-                }
-
-
-                if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) == 5))
-                {
-                    System.out.println(Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))));
-                    System.out.println(Integer.parseInt(packetdata.substring((packetdata.indexOf(" packets transmitted")  - 1), packetdata.indexOf(" packets transmitted"))));
-                    //System.out.println(Float.parseFloat(packetdata.substring((packetdata.indexOf(" ms")-5), packetdata.indexOf(" ms"))));
-
-                    return true;
-                }
-                else
-                {
-                    return false;
+                    if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) == 5))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -91,23 +74,31 @@ public class MonitorHelper
         {
             try
             {
-                if (reader != null) {
+                if (reader != null)
+                {
                     reader.close();
                 }
 
-                if (error != null) {
-                    error.close();
-                }
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+            }
 
-                if (process != null) {
+            try
+            {
+
+                if (process != null)
+                {
                     process.destroy();
                 }
 
             }
-            catch (IOException e)
+            catch (Exception e)
             {
                 e.printStackTrace();
             }
+
 
         }
         return false;
@@ -138,14 +129,24 @@ public class MonitorHelper
 
             channel = (ChannelExec) session.openChannel("exec");
 
+          //  channel.setCommand("uname");
+            //ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
+            //channel.setOutputStream(responseStream);
+
             channel.connect(10000);
 
-            System.out.println("Channel connection done.");
+           // String responseString = new String(responseStream.toByteArray());
+           // System.out.println(responseString);
 
             if (channel.isConnected() && session.isConnected())
             {
                 return true;
             }
+
+            /*if (responseString.equals("Linux") && channel.isConnected() && session.isConnected())
+            {
+                return true;
+            }*/
 
         }
 
@@ -159,18 +160,14 @@ public class MonitorHelper
             if (channel!= null)
             {
                 channel.disconnect();
-
-                System.out.println("Channel disconnected.");
             }
 
             if (session != null)
             {
                 session.disconnect();
-
-                System.out.println("SSH connection disconnected.");
             }
-
         }
+
         return false;
     }
 }

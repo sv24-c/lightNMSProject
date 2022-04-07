@@ -12,6 +12,14 @@ public class PollingHelper implements Job
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
     {
 
-        new PollingRunnable().pollingRunnableMethod();
+        try
+        {
+            new PollingRunnable().pollingRunnableMethod();
+        }
+
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

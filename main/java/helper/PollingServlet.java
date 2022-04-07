@@ -19,8 +19,6 @@ public class PollingServlet extends HttpServlet
         try
         {
 
-            System.out.println("Server started....");
-
             JobDetail jobDetail = JobBuilder.newJob(PollingHelper.class).build();
 
             Trigger trigger = TriggerBuilder.newTrigger().withIdentity("SimpleTrigger")
@@ -30,10 +28,11 @@ public class PollingServlet extends HttpServlet
             Scheduler scheduler = StdSchedulerFactory.getDefaultScheduler();
 
             scheduler.start();
+
             scheduler.scheduleJob(jobDetail, trigger);
 
-
         }
+
         catch (SchedulerException e)
         {
             e.printStackTrace();

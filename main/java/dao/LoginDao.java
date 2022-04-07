@@ -35,8 +35,6 @@ public class LoginDao //extends ActionSupport
 
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
 
-            System.out.println("Connection Established..");
-
         }
 
         catch (SQLException e)
@@ -61,7 +59,6 @@ public class LoginDao //extends ActionSupport
             {
                 connection.close();
 
-                System.out.println("Connection Closed...");
             }
 
         }
@@ -92,23 +89,17 @@ public class LoginDao //extends ActionSupport
 
             preparedStatement.setString(2, password);
 
-            System.out.println("Prepared statement created successfully");
-
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next())
             {
                 Map<String, Object> map = new LinkedHashMap<>();
 
-                System.out.println("New LinkedHashMap has created ");
-
                 map.put("UserName", resultSet.getString(1));
 
                 map.put("Password", resultSet.getString(2));
 
                 list.add(map);
-
-                System.out.println("Map added to list");
 
             }
 

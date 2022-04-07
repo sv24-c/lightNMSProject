@@ -15,6 +15,8 @@ public class DiscoveryBean
     private String Password;
     private int id;
 
+    String status;
+
     public int getId() {
         return id;
     }
@@ -53,8 +55,9 @@ public class DiscoveryBean
         return Username;
     }
 
-    public void setUsername(String username) {
+    public boolean setUsername(String username) {
         Username = username;
+        return true;
     }
 
     public String getPassword() {
@@ -63,6 +66,14 @@ public class DiscoveryBean
 
     public void setPassword(String password) {
         Password = password;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<DiscoveryBean> getDiscoveryBeanList() {

@@ -20,13 +20,6 @@ public class DashboardExecutor
         {
             if (!dashboardDao.dashboardShowData().isEmpty())
             {
-                /*dashboardBean.setUpCount((Integer) dashboardDao.dashboardShowData().get(0));
-
-                dashboardBean.setDownCount((Integer) dashboardDao.dashboardShowData().get(1));
-
-                dashboardBean.setUnknownCount((Integer) dashboardDao.dashboardShowData().get(2));
-                */
-
                 dashboardBean.setDashboardList(dashboardDao.dashboardShowData());
 
                 return true;

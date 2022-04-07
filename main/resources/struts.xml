@@ -7,7 +7,7 @@
 
     <!--<constant name="struts.devMode" value="true" />-->
 
-    <!--<package name="Start" namespace="/" extends="struts-default">
+    <package name="Start" namespace="/" extends="struts-default">
         
         <interceptors>
             <interceptor name="userSession" class=""></interceptor>
@@ -17,7 +17,7 @@
             <interceptor-ref name="userSession"/>
             <result>login.jsp</result>
         </action>
-    </package>-->
+    </package>
 
     <package name="default" extends="struts-default">
 
@@ -28,6 +28,14 @@
                 <param name="enableGZIP">true</param>
             </result-type>
         </result-types>
+
+        <interceptors>
+            <interceptor name="userSession" class="helper.SessionInterceptor" />
+        </interceptors>
+
+        <global-results>
+            <result name="loginUser" type="redirect">login.jsp</result>
+        </global-results>
 
         <action name="">
             <result>login.jsp</result>
@@ -43,54 +51,56 @@
         </action>
 
         <action name="dashboardClick" class="action.DashboardAction" method="dashboardData">
+            <interceptor-ref name="userSession" />
+            <result name="success" type="json"/>
+        </action>
+
+        <action name="discoveryProcess" class="action.DiscoveryAction" method="discoveryActionGetData">
+            <interceptor-ref name="userSession" />
+            <result name="success" type="json"/>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
+        </action>
+
+        <action name="discoveryInsertProcess" class="action.DiscoveryAction" method="discoveryActionInsert">
+            <result name="success" type="json"/>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
+        </action>
+
+        <action name="discoveryGetUsernameProcess" class="action.DiscoveryAction" method="discoveryActionGetUsername">
             <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
 
         </action>
 
-        <action name="discoveryProcess" class="action.DiscoveryAction" method="discovery">
+        <action name="discoveryUpdateProcess" class="action.DiscoveryAction" method="discoveryActionUpdate">
             <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
-        <action name="discoveryInsertProcess" class="action.DiscoveryAction" method="discoveryInsert">
+        <action name="discoveryDeleteProcess" class="action.DiscoveryAction" method="discoveryActionDelete">
             <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
-        <action name="discoveryGetUsernameProcess" class="action.DiscoveryAction" method="discoveryGetUsername">
+        <action name="monitorProcess" class="action.MonitorAction" method="provision">
             <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
-        <action name="discoveryUpdateProcess" class="action.DiscoveryAction" method="discoveryUpdate">
-            <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+        <action name="monitorShowDataProcess" class="action.MonitorAction" method="monitorActionGetAllData">
+            <interceptor-ref name="userSession" />
+            <result name="success" type="json"/>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
-        <action name="discoveryDeleteProcess" class="action.DiscoveryAction" method="discoveryDelete">
+        <action name="monitorDeleteProcess" class="action.MonitorAction" method="monitorActionDelete">
             <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
-        <action name="monitorProcess" class="action.MonitorAction" method="monitor">
+        <action name="monitorShowTableProcess" class="action.MonitorAction" method="monitorActionGetChartData">
             <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
-        </action>
-
-        <action name="monitorShowDataProcess" class="action.MonitorAction" method="showAllData">
-            <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
-        </action>
-
-        <action name="monitorDeleteProcess" class="action.MonitorAction" method="monitorDelete">
-            <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
-        </action>
-
-        <action name="monitorShowTableProcess" class="action.MonitorAction" method="monitorShowInChart">
-            <result name="success" type="json"></result>
-            <result name="failure">login.jsp</result>
+            <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
     </package>

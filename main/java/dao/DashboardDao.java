@@ -2,9 +2,7 @@ package dao;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by smit on 31/3/22.
@@ -59,7 +57,7 @@ public class DashboardDao
             {
                 connection.close();
 
-                System.out.println("Connection Closed..");
+                System.out.println("Connection Closed");
             }
 
         }

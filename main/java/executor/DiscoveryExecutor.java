@@ -14,87 +14,72 @@ public class DiscoveryExecutor
 {
     private DiscoveryDao discoveryDao = new DiscoveryDao();
 
-    public boolean discoveryShowData(DiscoveryBean discoveryBean)
+    public boolean discoveryExecutorGetData(DiscoveryBean discoveryBean)
     {
+        List<Map<String, Object>> list;
+
+        List<DiscoveryBean> discoveryBeanList;
 
         try
         {
 
-            List<Map<String, Object>> list;
+            discoveryBeanList = new ArrayList<>();
 
-            List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
-
-            list = discoveryDao.discoveryShowData();
-
-            for (int i = 0; i < list.size(); i++)
-            {
-                DiscoveryBean discovery = new DiscoveryBean();
-
-               discovery.setId((Integer) list.get(i).get("Id"));
-
-               discovery.setName((String) list.get(i).get("Name"));
-
-               discovery.setIP((String) list.get(i).get("IP"));
-
-               discovery.setType((String) list.get(i).get("Type"));
-
-               discoveryBeanList.add(discovery);
-
-            }
-
-            discoveryBean.setDiscoveryBeanList(discoveryBeanList);
-
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return true;
-    }
-
-    public boolean discoveryGetUsernameData(DiscoveryBean discoveryBean)
-    {
-        DiscoveryDao discoveryDao = new DiscoveryDao();
-
-        try
-        {
-
-          discoveryBean.setUsername(discoveryDao.discoveryGetUsernameDaoData(discoveryBean.getId()));
-        }
-
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        return true;
-    }
-
-    public boolean discoveryInsertInDatabase(DiscoveryBean discoveryBean)
-    {
-
-        try
-        {
-
-            List<Map<String, Object>> list;
-
-            new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
-
-            return true;
-
-            /*list = discoveryDao.discoveryCheckRedundantData(discoveryBean.getIP(), discoveryBean.getType());
+            list = discoveryDao.discoveryDaoGetData();
 
             if (!list.isEmpty())
             {
-                new DiscoveryDao().discovery(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword());
+                for (int i = 0; i < list.size(); i++)
+                {
+                    DiscoveryBean discovery = new DiscoveryBean();
+
+                    discovery.setId((Integer) list.get(i).get("Id"));
+
+                    discovery.setName((String) list.get(i).get("Name"));
+
+                    discovery.setIP((String) list.get(i).get("IP"));
+
+                    discovery.setType((String) list.get(i).get("Type"));
+
+                    discoveryBeanList.add(discovery);
+
+                }
+
+                discoveryBean.setDiscoveryBeanList(discoveryBeanList);
 
                 return true;
             }
-            else
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    public boolean discoveryExecutorGetUsernameData(DiscoveryBean discoveryBean)
+    {
+        DiscoveryDao discoveryDao;
+
+        String userName = null;
+
+        try
+        {
+          //discoveryBean.setUsername(discoveryDao.discoveryGetUsernameDaoData(discoveryBean.getId()));
+
+            discoveryDao = new DiscoveryDao();
+
+            userName = discoveryDao.discoveryDaoGetUsernameData(discoveryBean.getId());
+
+            if (!userName.isEmpty())
             {
-                return false;
-            }*/
+                if(discoveryBean.setUsername(userName))
+                {
+                    return true;
+                }
+            }
         }
 
         catch (Exception e)
@@ -105,33 +90,73 @@ public class DiscoveryExecutor
         return false;
     }
 
-    public boolean discoveryUpdateInDatabase(DiscoveryBean discoveryBean)
+    public boolean discoveryExecutorInsertInDatabase(DiscoveryBean discoveryBean)
     {
+        List<String> list;
 
         try
         {
-            new DiscoveryDao().discoveryUpdateData(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getUsername(), discoveryBean.getPassword(), discoveryBean.getId());
+
+            list = discoveryDao.discoveryDaoCheckRedundantData(discoveryBean.getIP(), discoveryBean.getType());
+
+            if (!list.isEmpty())
+            {
+                discoveryBean.setStatus(discoveryBean.getIP()+" and "+discoveryBean.getType()+" already in Discovery");
+
+                return true;
+            }
+            else
+            {
+                if(discoveryDao.discoveryDaoInsertData(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getType(), discoveryBean.getUsername(), discoveryBean.getPassword()))
+                {
+                    discoveryBean.setStatus(discoveryBean.getIP()+" and "+discoveryBean.getType()+" added to Discovery");
+
+                    return true;
+                }
+            }
         }
+
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return true;
+        return false;
     }
 
-    public boolean discoveryDeleteInDatabase(DiscoveryBean discoveryBean)
+    public boolean discoveryExecutorUpdate(DiscoveryBean discoveryBean)
     {
 
         try
         {
-            new DiscoveryDao().discoveryDeleteData(discoveryBean.getId());
+            if(discoveryDao.discoveryDaoUpdateData(discoveryBean.getName(), discoveryBean.getIP(), discoveryBean.getUsername(), discoveryBean.getPassword(), discoveryBean.getId()))
+            {
+                return true;
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return true;
+        return false;
+    }
+
+    public boolean discoveryExecutorDelete(DiscoveryBean discoveryBean)
+    {
+
+        try
+        {
+            if(discoveryDao.discoveryDaoDeleteData(discoveryBean.getId()))
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

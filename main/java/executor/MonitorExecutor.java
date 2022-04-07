@@ -1,13 +1,14 @@
 package executor;
 
+import bean.DiscoveryBean;
 import bean.MonitorBean;
+import dao.DiscoveryDao;
 import dao.MonitorDao;
 import dao.PollingDao;
 import helper.MonitorHelper;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,97 +20,122 @@ public class MonitorExecutor
 
     private MonitorDao monitorDao = new MonitorDao();
 
-    public boolean monitorPing(MonitorBean monitorBean)
+    public boolean deviceProvision(MonitorBean monitorBean)
     {
 
-        try
+        try 
         {
 
-            MonitorHelper monitorHelper = new MonitorHelper();
+            /*MonitorHelper monitorHelper = new MonitorHelper();
 
             String name = null;
+            
             String ip = null;
+            
             String type = null;
+            
             String username = null;
+            
             String password = null;
+            
             boolean pingresult;
 
             List<String> pingcommands = new ArrayList<>();
 
-            List<Map<String, Object>> list;
+            List<String> usernamePasswordList;
 
-            list = monitorDao.monitorShowData(monitorBean.getId());
+            List<String> provisionDataList;
 
-            for (int i = 0; i < list.size(); i++)
+            provisionDataList = monitorDao.monitorDaoGetDataForProvision(monitorBean.getId());
+
+            if(!provisionDataList.isEmpty())
             {
 
-                name = (String) list.get(i).get("Name");
+                name = provisionDataList.get(0);
 
-                ip   = (String) list.get(i).get("IP");
+                ip = provisionDataList.get(1);
 
-                type = (String) list.get(i).get("Type");
-
-                username = (String) list.get(i).get("Username");
-
-                password = (String) list.get(i).get("Password");
+                type = provisionDataList.get(2);
             }
 
-            pingcommands.add("ping");
-            pingcommands.add("-c");
-            pingcommands.add("5");
-            pingcommands.add(ip);
-
-            pingresult = monitorHelper.ping(pingcommands);
-
-            if(pingresult && type.equals("Ping") )
+            if(monitorDao.monitorDaoGetData(monitorBean.getId()))
             {
-
-                monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
+                monitorBean.setStatus(ip+" already added to Monitor Grid");
 
                 return true;
-
-                /*if(monitorDao.monitorCheckRedundantIdData(monitorBean.getId()) == monitorBean.getId())
-                {
-                    return true;
-                }
-                else
-                {
-                    monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
-
-                    return true;
-                }*/
-            }
-
-            else if(pingresult && type.equals("SSH"))
-            {
-
-                if (monitorHelper.ssh(username, password, ip))
-                {
-
-                    monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
-
-                    return true;
-
-                    /*if (monitorDao.monitorCheckRedundantIdData(monitorBean.getId()) == monitorBean.getId())
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        monitorDao.monitorInsertInDataBase(monitorBean.getId(), name, ip, type);
-
-                        return true;
-                    }*/
-                }
-
             }
 
             else
             {
-                System.out.println("Make sure type is appropriate");
 
-                return false;
+
+                pingcommands.add("ping");
+                pingcommands.add("-c");
+                pingcommands.add("5");
+                pingcommands.add(ip);
+
+                pingresult = monitorHelper.ping(pingcommands);
+
+                if (pingresult)
+                {
+
+                    if (type.equals("Ping"))
+                    {
+
+                        monitorBean.setStatus(ip+" Provision Done.");
+
+                        monitorDao.monitorDaoInsert(monitorBean.getId(), name, ip, type);
+
+                        return true;
+
+                    }
+
+                    else if (type.equals("SSH"))
+                    {
+
+                        DiscoveryDao discoveryDao = new DiscoveryDao();
+
+                        usernamePasswordList = discoveryDao.discoveryDaoGetUsernamePasswordData(monitorBean.getId());
+
+                        if (!usernamePasswordList.isEmpty())
+                        {
+                            username = usernamePasswordList.get(1);
+
+                            password = usernamePasswordList.get(2);
+                        }
+
+                        if (monitorHelper.ssh(username, password, ip))
+                        {
+
+                            monitorBean.setStatus(ip+" Provision Done.");
+
+                            monitorDao.monitorDaoInsert(monitorBean.getId(), name, ip, type);
+
+                            return true;
+                        }
+                        else
+                        {
+                            monitorBean.setStatus("SSH Failed to this " + ip);
+
+                            return false;
+                        }
+
+                    }
+                    else
+                    {
+                        monitorBean.setStatus("Device Type Would be Ping or SSH only");
+
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    monitorBean.setStatus("Provision Failed "+ip);
+                }
             }
+*/
+
 
         }
         catch (Exception e)
@@ -120,7 +146,7 @@ public class MonitorExecutor
         return false;
     }
 
-    public boolean monitorShowAllData(MonitorBean monitorBean)
+    public boolean monitorExecutorGetAllData(MonitorBean monitorBean)
     {
         try
         {
@@ -129,24 +155,23 @@ public class MonitorExecutor
 
             List<MonitorBean> monitorBeanList = new ArrayList<>();
 
-            list = monitorDao.monitorShowAllData();
+            list = monitorDao.monitorDaoGetAllData();
 
             for (int i = 0; i < list.size(); i++)
             {
-                MonitorBean monitorBeanShow = new MonitorBean();
+                MonitorBean monitorBeanData = new MonitorBean();
 
-                monitorBeanShow.setId((Integer) list.get(i).get("Id"));
+                monitorBeanData.setId((Integer) list.get(i).get("Id"));
 
-                monitorBeanShow.setName(String.valueOf(list.get(i).get("Name")));
+                monitorBeanData.setName(String.valueOf(list.get(i).get("Name")));
 
-                monitorBeanShow.setIp((String) list.get(i).get("IP"));
+                monitorBeanData.setIp((String) list.get(i).get("IP"));
 
-                monitorBeanShow.setType((String) list.get(i).get("Type"));
+                monitorBeanData.setType((String) list.get(i).get("Type"));
 
-                monitorBeanShow.setAvailability((String) list.get(i).get("Availability"));
+                monitorBeanData.setAvailability((String) list.get(i).get("Availability"));
 
-                monitorBeanList.add(monitorBeanShow);
-
+                monitorBeanList.add(monitorBeanData);
             }
 
             monitorBean.setMonitorBeanList(monitorBeanList);
@@ -160,22 +185,24 @@ public class MonitorExecutor
         return true;
     }
 
-    public boolean monitorDeleteInDatabase(MonitorBean monitorBean)
+    public boolean monitorExecutorDelete(MonitorBean monitorBean)
     {
         try
         {
-
-            monitorDao.monitorDeleteData(monitorBean.getId());
+            if(monitorDao.monitorDaoDeleteData(monitorBean.getId()))
+            {
+                return true;
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return true;
+        return false;
     }
 
-    public boolean monitorShowAllDataInCharts(MonitorBean monitorBean)
+    public boolean monitorExecutorGetChartsData(MonitorBean monitorBean)
     {
         try
         {
@@ -184,9 +211,9 @@ public class MonitorExecutor
 
             List<Object> sshShowResultList;
 
-            List<Integer> pingStatusList = null;
+            List<Integer> pingStatusList;
 
-            List<Integer> sshShowStatusList = null;
+            List<Integer> sshShowStatusList;
 
             Map<Timestamp, Float> map;
 
@@ -194,23 +221,28 @@ public class MonitorExecutor
 
             PollingDao pollingDao = new PollingDao();
 
-            System.out.println(monitorBean.getType());
-
             if (monitorBean.getType().equals("Ping"))
             {
-                pingShowResultList = pollingDao.getPollingPingData(monitorBean.getId());
+                pingShowResultList = pollingDao.pollingDaoGetPingData(monitorBean.getId());
 
-                monitorBean.setMatrixList(pingShowResultList);
+                if (!pingShowResultList.isEmpty())
+                {
+                    monitorBean.setMatrixList(pingShowResultList);
+                }
 
-                //monitorBean.setPollingPingAvailabilityStatus(pollingDao.getPollingPingAvailabilityData(monitorBean.getId()));
+                pingStatusList = (pollingDao.pollingDaoGetPingAvailabilityData(monitorBean.getId()));
 
-                pingStatusList = (pollingDao.getPollingPingAvailabilityData(monitorBean.getId()));
+                if (!pingStatusList.isEmpty())
+                {
+                    monitorBean.setPingStatusList(pingStatusList);
+                }
 
-                monitorBean.setPingStatusList(pingStatusList);
+                mapofRtt = pollingDao.pollingDaoGetPingRttData(monitorBean.getId());
 
-                mapofRtt = pollingDao.getPollingPingRttData(monitorBean.getId());
-
-                monitorBean.setRttMap(mapofRtt);
+                if (!mapofRtt.isEmpty())
+                {
+                    monitorBean.setRttMap(mapofRtt);
+                }
 
                 return true;
             }
@@ -218,25 +250,33 @@ public class MonitorExecutor
             else if (monitorBean.getType().equals("SSH"))
             {
 
-                sshShowResultList = pollingDao.getPollingSSHData(monitorBean.getId());
+                sshShowResultList = pollingDao.pollingDaoGetSSHData(monitorBean.getId());
 
-                monitorBean.setSshMatrixList(sshShowResultList);
+                if (!sshShowResultList.isEmpty())
+                {
+                    monitorBean.setSshMatrixList(sshShowResultList);
+                }
 
-                sshShowStatusList = (pollingDao.getPollingSSHAvailabilityData(monitorBean.getId()));
+                sshShowStatusList = (pollingDao.pollingDaoGetSSHAvailabilityData(monitorBean.getId()));
 
-                monitorBean.setSshStatusList(sshShowStatusList);
+                if (!sshShowStatusList.isEmpty())
+                {
+                    monitorBean.setSshStatusList(sshShowStatusList);
+                }
 
-                map = pollingDao.getPollingSSHCpuData(monitorBean.getId());
+                map = pollingDao.pollingDaoGetSSHCpuData(monitorBean.getId());
 
-                monitorBean.setCpuMap(map);
+                if (!map.isEmpty())
+                {
+                    monitorBean.setCpuMap(map);
+                }
+
 
                 return true;
             }
 
             else
             {
-                System.out.println("Not able to get Data");
-
                 return false;
             }
 

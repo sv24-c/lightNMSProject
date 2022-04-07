@@ -33,8 +33,6 @@ public class MonitorDao
 
             con = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
 
-            System.out.println("Connection Established..");
-
         }
 
         catch (SQLException e)
@@ -59,7 +57,6 @@ public class MonitorDao
             {
                 connection.close();
 
-                System.out.println("Connection Closed..");
             }
 
         }
@@ -69,7 +66,7 @@ public class MonitorDao
         }
     }
 
-    public List monitorShowData(int id)
+    public boolean monitorDaoGetData(int id)
     {
         ResultSet resultSet;
 
@@ -77,7 +74,7 @@ public class MonitorDao
 
         PreparedStatement preparedStatement = null;
 
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        int checkId=0;
 
         try
         {
@@ -86,43 +83,24 @@ public class MonitorDao
             if ( con != null)
             {
 
-                preparedStatement = con.prepareStatement("SELECT Name, IP, Type, Username, Password FROM Discovery where Id = ?");
-
-                System.out.println("Prepared statement created successfully");
+                preparedStatement = con.prepareStatement("SELECT Id FROM Monitor where Id = ?");
 
                 preparedStatement.setInt(1, id);
 
                 resultSet = preparedStatement.executeQuery();
 
-                 while (resultSet.next())
+                while (resultSet.next())
                 {
 
-                    Map<String, Object> map = new LinkedHashMap<String, Object>();
-
-                    System.out.println("New LinkedHashMap has created ");
-
-                    map.put("Name", resultSet.getString(1));
-
-                    map.put("IP", resultSet.getString(2));
-
-                    map.put("Type", resultSet.getString(3));
-
-                    map.put("Username", resultSet.getString(4));
-
-                    map.put("Password", resultSet.getString(5));
-
-                    list.add(map);
-
-                    System.out.println("Map added to list.");
+                   checkId = resultSet.getInt(1);
 
                 }
-            }
 
-            else
-            {
-                System.out.println("Connection is not established");
+                if (checkId == id)
+                {
+                    return true;
+                }
             }
-
         }
 
         catch (SQLException e)
@@ -141,20 +119,22 @@ public class MonitorDao
             closeConnection(preparedStatement, con);
         }
 
-        return list;
+        return false;
     }
 
-    public String monitorInsertInDataBase(int id, String name, String ip, String type)
+    public String monitorDaoInsert(int id, String name, String ip, String type)
     {
         Connection con = null;
 
         PreparedStatement preparedStatementOfInsert = null;
 
-        String availability = "unknown";
+        String availability;
 
         try
         {
             con = makeConnection();
+
+            availability = "unknown";
 
             if ( con != null)
             {
@@ -170,15 +150,8 @@ public class MonitorDao
 
                 preparedStatementOfInsert.setString(5, availability);
 
-                int result = preparedStatementOfInsert.executeUpdate();
+                preparedStatementOfInsert.executeUpdate();
 
-                System.out.println(result + " record inserted successfully");
-
-            }
-
-            else
-            {
-                System.out.println("Connection not established...");
             }
 
         }
@@ -199,7 +172,7 @@ public class MonitorDao
         return null;
     }
 
-    public List monitorShowAllData()
+    public List monitorDaoGetAllData()
     {
         ResultSet resultSet;
 
@@ -207,25 +180,25 @@ public class MonitorDao
 
         PreparedStatement preparedStatement = null;
 
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> list = null;
 
         try
         {
             con = makeConnection();
 
-            if ( con != null) {
+            list = new ArrayList<>();
+
+            if ( con != null)
+            {
 
                 preparedStatement = con.prepareStatement("SELECT Id, Name, IP, Type, Availability FROM Monitor");
 
-                System.out.println("Prepared statement created successfully");
-
                 resultSet = preparedStatement.executeQuery();
 
-                while (resultSet.next()) {
+                while (resultSet.next())
+                {
 
                     Map<String, Object> map = new LinkedHashMap<String, Object>();
-
-                    System.out.println("New LinkedHashMap has created ");
 
                     map.put("Id", resultSet.getInt(1));
 
@@ -239,16 +212,8 @@ public class MonitorDao
 
                     list.add(map);
 
-                    System.out.println("Map added to list.");
-
                 }
             }
-
-            else
-            {
-                System.out.println("Connection is not established");
-            }
-
         }
 
         catch (SQLException e)
@@ -270,7 +235,7 @@ public class MonitorDao
         return list;
     }
 
-    public String  monitorDeleteData(int id)
+    public boolean monitorDaoDeleteData(int id)
     {
         Connection con = null;
 
@@ -286,15 +251,14 @@ public class MonitorDao
 
                 preparedStatementOfDelete.setInt(1, id);
 
-                int result = preparedStatementOfDelete.executeUpdate();
+                preparedStatementOfDelete.executeUpdate();
 
-                System.out.println(result + " record Deleted successfully");
-
+                return true;
             }
 
             else
             {
-                System.out.println("Connection not established...");
+                return false;
             }
         }
 
@@ -311,10 +275,10 @@ public class MonitorDao
             closeConnection(preparedStatementOfDelete, con);
         }
 
-        return null;
+        return false;
     }
 
-    public String monitorAvailabilityUpdate(String availability, int id)
+    public void monitorAvailabilityUpdate(String availability, int id)
     {
         Connection con = null;
 
@@ -333,15 +297,8 @@ public class MonitorDao
 
                 preparedStatementOfUpdate.setInt(2, id);
 
-                int result = preparedStatementOfUpdate.executeUpdate();
+                preparedStatementOfUpdate.executeUpdate();
 
-                System.out.println(result + " record Updated successfully");
-
-            }
-
-            else
-            {
-                System.out.println("Connection not established...");
             }
         }
 
@@ -358,10 +315,9 @@ public class MonitorDao
             closeConnection(preparedStatementOfUpdate, con);
         }
 
-        return null;
     }
 
-    public int monitorCheckRedundantIdData(int id)
+    public List<String> monitorDaoGetDataForProvision(int id)
     {
         ResultSet resultSet;
 
@@ -371,16 +327,18 @@ public class MonitorDao
 
         int resultid = 0;
 
+        List<String> dataList = null;
+
         try
         {
             con = makeConnection();
 
+            dataList = new ArrayList<>();
+
             if ( con != null)
             {
 
-                preparedStatement = con.prepareStatement("SELECT Id FROM Monitor where Id = ?");
-
-                System.out.println("Prepared statement created successfully");
+                preparedStatement = con.prepareStatement("SELECT Name, IP, Type, Username, Password FROM Discovery where Id = ?");
 
                 preparedStatement.setInt(1, id);
 
@@ -388,16 +346,13 @@ public class MonitorDao
 
                 while (resultSet.next())
                 {
-                    resultSet.getInt(id);
-
+                    dataList.add(resultSet.getString(1));
+                    dataList.add(resultSet.getString(2));
+                    dataList.add(resultSet.getString(3));
+                    dataList.add(resultSet.getString(4));
+                    dataList.add(resultSet.getString(5));
                 }
             }
-
-            else
-            {
-                System.out.println("Connection is not established");
-            }
-
         }
 
         catch (SQLException e)
@@ -416,7 +371,7 @@ public class MonitorDao
             closeConnection(preparedStatement, con);
         }
 
-        return resultid;
+        return dataList;
     }
 }
 

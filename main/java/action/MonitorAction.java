@@ -13,7 +13,7 @@ public class MonitorAction implements ModelDriven
 
     private MonitorBean monitorBean = new MonitorBean();
 
-    public String monitor()
+    public String provision()
     {
 
         try
@@ -21,7 +21,7 @@ public class MonitorAction implements ModelDriven
 
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            if(monitorExecutor.monitorPing(monitorBean))
+            if(monitorExecutor.deviceProvision(monitorBean))
             {
                 return "success";
             }
@@ -41,13 +41,13 @@ public class MonitorAction implements ModelDriven
         return "failure";
     }
 
-    public String showAllData()
+    public String monitorActionGetAllData()
     {
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            if(monitorExecutor.monitorShowAllData(monitorBean))
+            if(monitorExecutor.monitorExecutorGetAllData(monitorBean))
             {
                 return "success";
             }
@@ -66,13 +66,13 @@ public class MonitorAction implements ModelDriven
         return "failure";
     }
 
-    public String monitorDelete()
+    public String monitorActionDelete()
     {
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            monitorExecutor.monitorDeleteInDatabase(monitorBean);
+            monitorExecutor.monitorExecutorDelete(monitorBean);
         }
         catch (Exception e)
         {
@@ -82,14 +82,14 @@ public class MonitorAction implements ModelDriven
         return "success";
     }
 
-    public String monitorShowInChart()
+    public String monitorActionGetChartData()
     {
 
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            if(monitorExecutor.monitorShowAllDataInCharts(monitorBean))
+            if(monitorExecutor.monitorExecutorGetChartsData(monitorBean))
             {
                 return "success";
             }

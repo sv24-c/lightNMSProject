@@ -12,14 +12,14 @@ public class DiscoveryAction implements ModelDriven
 
     DiscoveryBean discoveryBean = new DiscoveryBean();
 
-    public String discovery()
+    public String discoveryActionGetData()
     {
 
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryShowData(discoveryBean))
+            if(discoveryExecutor.discoveryExecutorGetData(discoveryBean))
             {
                 return "success";
             }
@@ -38,14 +38,14 @@ public class DiscoveryAction implements ModelDriven
         return "failure";
     }
 
-    public String discoveryGetUsername()
+    public String discoveryActionGetUsername()
     {
 
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryGetUsernameData(discoveryBean))
+            if(discoveryExecutor.discoveryExecutorGetUsernameData(discoveryBean))
             {
                 return "success";
             }
@@ -64,13 +64,13 @@ public class DiscoveryAction implements ModelDriven
         return "failure";
     }
 
-    public String discoveryInsert()
+    public String discoveryActionInsert()
     {
         try
         {
             DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryInsertInDatabase(discoveryBean))
+            if(discoveryExecutor.discoveryExecutorInsertInDatabase(discoveryBean))
             {
 
                 return "success";
@@ -89,13 +89,13 @@ public class DiscoveryAction implements ModelDriven
         return "failure";
     }
 
-    public String discoveryUpdate()
+    public String discoveryActionUpdate()
     {
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryUpdateInDatabase(discoveryBean))
+            if(discoveryExecutor.discoveryExecutorUpdate(discoveryBean))
             {
                 return "success";
             }
@@ -112,20 +112,27 @@ public class DiscoveryAction implements ModelDriven
         return "failure";
     }
 
-    public String discoveryDelete()
+    public String discoveryActionDelete()
     {
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            discoveryExecutor.discoveryDeleteInDatabase(discoveryBean);
+            if(discoveryExecutor.discoveryExecutorDelete(discoveryBean))
+            {
+                return "success";
+            }
+            else
+            {
+                return "failure";
+            }
         }
         catch (Exception e)
         {
             e.printStackTrace();
         }
 
-        return "success";
+        return "failure";
     }
 
     @Override

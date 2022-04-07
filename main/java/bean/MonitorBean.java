@@ -1,7 +1,5 @@
 package bean;
 
-import com.sun.org.apache.bcel.internal.generic.FLOAD;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,6 +16,8 @@ public class MonitorBean
     private String type;
     private int id;
     private String availability;
+
+    String status;
 
     float cpu;
     float memory;
@@ -99,6 +99,14 @@ public class MonitorBean
 
     public void setDisk(float disk) {
         this.disk = disk;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<MonitorBean> getMonitorBeanList() {
