@@ -109,6 +109,7 @@ var discoveryVariable = {
             });
     }
 
+
 };
 
 function discoveryClickButton()
@@ -356,7 +357,7 @@ function showMonitor(that)
     ip = $(that).parent().prev().prev().prev().text();
 
     if(type === "Ping")
-   {
+    {
        $("#overview").html('<div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>'+ip +'</b> &nbsp;&nbsp;&nbsp;Type: <b>'+type+'</b></div></div></div></div> <br><br> <div class="row"><div id="pingchartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"><div id="pingchartContainerPartTwo" style="height: 300px; width: 100%;"></div></div></div>  <br><br><br>      <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="packetLoss" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Packet Loss(%)<hr><p style="font-size: 25px"></p></div>    <div id="rtt" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">RTT(ms)<hr><p style="font-size: 25px"> </p> </div><div id="ReceivePacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Receive Packet<hr><p style="font-size: 25px"> </p> </div><div id="SendPacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Send Packet<hr><p style="font-size: 25px"> </p></div>    </div>  </div></div>    ');
 
        var up = 0;
@@ -424,7 +425,7 @@ function showMonitor(that)
                    axisY: {
                        title: "Total RTT",
                        minimum: 0,
-                       maximum: 20,
+                       maximum: 10,
                        suffix: "ms",
                        includeZero: true
                    },
@@ -546,10 +547,5 @@ function showMonitor(that)
                alert("Something went Wrong");
            }
        });
-
-
-
-
    }
-
 }
