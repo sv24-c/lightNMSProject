@@ -1,60 +1,65 @@
 package action;
 
+import bean.LoginBean;
+import com.opensymphony.xwork2.ModelDriven;
 import executor.LoginExecutor;
+import helper.Logger;
+import org.apache.struts2.dispatcher.SessionMap;
+import org.apache.struts2.interceptor.SessionAware;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Map;
 
-
-public class LoginAction
+public class LoginAction implements SessionAware, ModelDriven
 {
-    private String userName;
-
-    private String password;
+    private LoginBean loginBean = new LoginBean();
 
     private LoginExecutor loginExecutor = new LoginExecutor();
 
-    public String getUserName()
-    {
-        return userName;
-    }
+    private static Logger _logger = new Logger();
 
-    public void setUserName(String userName)
-    {
-        this.userName = userName;
-    }
+    //not thread safe
+    private String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
 
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
+    private SessionMap<String, Object> sessionMain;
 
     public String login()
     {
         try
         {
-
-            if (loginExecutor.login(userName, password))
+            if (loginExecutor.logIn(loginBean.getUserName(), loginBean.getPassword()))
             {
-                return "success";
-            }
+                loginBean.setStatus("Success");
 
-            else
-            {
-                return "failure";
+                sessionMain.put("user", loginBean.getUserName());
+
+                _logger.info("successfully login...at "+timeStamp);
             }
-//        return "success";
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("LoginAction logIn method having error. at "+timeStamp, exception);
         }
 
-        return "failure";
+        return "success";
     }
 
+    public String logout()
+    {
+        sessionMain.invalidate();
+
+        return "success";
+    }
+
+    @Override
+    public void setSession(Map<String, Object> map) {
+        this.sessionMain = (SessionMap<String, Object>) map;
+    }
+
+    @Override
+    public Object getModel()
+    {
+        return loginBean;
+    }
 }
 

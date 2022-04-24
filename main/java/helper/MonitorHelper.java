@@ -5,6 +5,7 @@ import com.jcraft.jsch.JSch;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -15,10 +16,11 @@ import java.util.List;
 public class MonitorHelper
 {
 
+    private static final Logger _logger = new Logger();
+
     public boolean ping(List<String> pinglist)
     {
-
-        String packetdata = "";
+        StringBuilder packetdata = new StringBuilder();
 
         String result = "";
 
@@ -30,10 +32,8 @@ public class MonitorHelper
 
         try
         {
-
             if(!pinglist.isEmpty())
             {
-
                 processBuilder = new ProcessBuilder(pinglist);
 
                 process = processBuilder.start();
@@ -42,13 +42,12 @@ public class MonitorHelper
 
                 while ((result = reader.readLine()) != null)
                 {
-                    packetdata+=result;
-
+                    packetdata.append(result);
                 }
 
-                if (!packetdata.isEmpty())
+                if (packetdata.length() > 0)
                 {
-                    if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) == 5))
+                    if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) == CommonConstant.RECEVIEDPACKET))
                     {
                         return true;
                     }
@@ -58,18 +57,15 @@ public class MonitorHelper
                     }
                 }
             }
-
             else
             {
                 return false;
             }
         }
-
-        catch(Exception e)
+        catch(Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("MonitorHelper ping method having error. ", exception);
         }
-
         finally
         {
             try
@@ -78,28 +74,23 @@ public class MonitorHelper
                 {
                     reader.close();
                 }
-
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("MonitorHelper in ping method reader close having error. ", exception);
             }
 
             try
             {
-
                 if (process != null)
                 {
                     process.destroy();
                 }
-
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("MonitorHelper in ping method process close having error. ", exception);
             }
-
-
         }
         return false;
     }
@@ -116,45 +107,35 @@ public class MonitorHelper
 
         try
         {
-
-            session = new JSch().getSession(username, ip, 22);
+            session = new JSch().getSession(username, ip, CommonConstant.SSHPORT);
 
             session.setPassword(decryptedPassword);
 
             session.setConfig("StrictHostKeyChecking", "no");
 
-            session.setTimeout(10000);
-
-            session.connect();
+            session.connect(10*1000);
 
             channel = (ChannelExec) session.openChannel("exec");
 
-          //  channel.setCommand("uname");
-            //ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
-            //channel.setOutputStream(responseStream);
+            channel.setCommand("uname");
 
-            channel.connect(10000);
+            ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
 
-           // String responseString = new String(responseStream.toByteArray());
-           // System.out.println(responseString);
+            channel.setOutputStream(responseStream);
 
-            if (channel.isConnected() && session.isConnected())
+            channel.connect(10*1000);
+
+            String responseString = new String(responseStream.toByteArray());
+
+            if (responseString.trim().equals("Linux"))
             {
                 return true;
             }
-
-            /*if (responseString.equals("Linux") && channel.isConnected() && session.isConnected())
-            {
-                return true;
-            }*/
-
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("MonitorHelper ssh method having error. ", exception);
         }
-
         finally
         {
             if (channel!= null)
@@ -167,7 +148,6 @@ public class MonitorHelper
                 session.disconnect();
             }
         }
-
         return false;
     }
 }

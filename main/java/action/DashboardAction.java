@@ -3,6 +3,7 @@ package action;
 import bean.DashboardBean;
 import com.opensymphony.xwork2.ModelDriven;
 import executor.DashboardExecutor;
+import helper.Logger;
 
 /**
  * Created by smit on 31/3/22.
@@ -11,14 +12,13 @@ public class DashboardAction implements ModelDriven
 {
     DashboardBean dashboardBean = new DashboardBean();
 
-    public String dashboardData()
-    {
+    private final Logger _logger = new Logger();
 
+    public String dashboardData()//dashboardFetchData()
+    {
         try
         {
             DashboardExecutor dashboardExecutor = new DashboardExecutor();
-
-
 
             if(dashboardExecutor.dashboardShowData(dashboardBean))
             {
@@ -28,19 +28,18 @@ public class DashboardAction implements ModelDriven
             {
                 return "failure";
             }
-
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("DashboardAction dashboardActionFetchData method having error", exception);
         }
 
         return "failure";
     }
 
     @Override
-    public Object getModel() {
+    public Object getModel()
+    {
         return dashboardBean;
     }
 }

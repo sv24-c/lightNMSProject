@@ -1,68 +1,20 @@
 package dao;
 
+import helper.ConnectionPool;
+import helper.Logger;
+
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Created by smit on 27/3/22.
  */
 public class PollingDao
 {
-    static
-    {
-        try
-        {
-            Class.forName("com.mysql.cj.jdbc.Driver");
 
-        }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-    }
+    private static Logger _logger = new Logger();
 
-    public Connection makeConnection()
-    {
-        Connection con = null;
-
-        try
-        {
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
-        }
-
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return con;
-    }
-
-    public void closeConnection(PreparedStatement preparedStatement, Connection connection)
-    {
-        try
-        {
-
-            if (preparedStatement != null || !preparedStatement.isClosed())
-            {
-                preparedStatement.close();
-            }
-
-            if (connection != null || !connection.isClosed())
-            {
-                connection.close();
-            }
-
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public void pollingDaoPingInsertData(int id, String ip, int sendPacket, int receivePacket, int packetLoss, float rtt, Timestamp time, String status)
+    public void pollingPingInsert(int id, String ip, int sendPacket, int receivePacket, int packetLoss, float rtt, Timestamp time, String status)
     {
         Connection con = null;
 
@@ -70,7 +22,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
@@ -94,29 +46,29 @@ public class PollingDao
 
                 preparedStatementOfInsert.executeUpdate();
             }
-
             else
             {
-                System.out.println("Connection not established...");
+                _logger.info("Connection not established PollingDao pollingDaoPingInsert method...");
             }
-
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
 
-            System.out.println(e.getStackTrace());
+            _logger.error("PollingDao pollingPingInsert method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatementOfInsert, con);
+            ConnectionPool.closePreparedStatement(preparedStatementOfInsert);
+
+            ConnectionPool.releaseConnection(con);
+
         }
     }
 
-    public void pollingDaoSSHInsertData(int id, String ip, double cpu, double memory, float disk, Timestamp time, String status, float swapMemory)
+    public void pollingSSHInsert(int id, String ip, double cpu, double memory, float disk, Timestamp time, String status, float swapMemory)
     {
         Connection con = null;
 
@@ -124,9 +76,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
-
-            con.setAutoCommit(false);
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
@@ -154,33 +104,27 @@ public class PollingDao
 
             else
             {
-                System.out.println("Connection not established...");
+                _logger.info("Connection not established PollingDao pollingDaoSSHInsert method...");
             }
-
-            con.setAutoCommit(true);
 
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
-
-            System.out.println(e.getStackTrace());
-
+            _logger.error("PollingDao pollingSSHInsert method having error. ", exception);
         }
 
         finally
         {
-            closeConnection(preparedStatementOfInsert, con);
+            ConnectionPool.closePreparedStatement(preparedStatementOfInsert);
+
+            ConnectionPool.releaseConnection(con);
+
         }
     }
 
-    public List pollingDaoGetUsernamePassword(int id)
+    public List<String> pollingFetchUsernamePassword(int id)
     {
-
-        String uname=null;
-
-        String pass = null;
 
         List<String> stringList = null;
 
@@ -192,7 +136,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             stringList = new ArrayList<>();
 
@@ -207,14 +151,9 @@ public class PollingDao
 
                 while (resultSet.next())
                 {
+                    stringList.add(resultSet.getString(1));
 
-                    uname = resultSet.getString(1);
-
-                    pass = resultSet.getString(2);
-
-                    stringList.add(uname);
-
-                    stringList.add(pass);
+                    stringList.add(resultSet.getString(2));
 
                 }
 
@@ -222,37 +161,32 @@ public class PollingDao
 
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingFetchUsernamePassword method...");
             }
 
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("PollingDao pollingFetchUsernamePassword method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return stringList;
     }
 
-    public List pollingDaoGetSSHAvailabilityData(int id)
+    public List<Integer> pollingSSHFetchAvailabilityData(int id)
     {
         List<Integer> list = null;
-
-        int sshUpCount = 0;
-
-        int sshDownCount = 0;
 
         ResultSet resultSet;
 
@@ -262,7 +196,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             list = new ArrayList<>();
 
@@ -277,52 +211,40 @@ public class PollingDao
 
                 while (resultSet.next())
                 {
+                    list.add( resultSet.getInt(1));
 
-                    sshUpCount = resultSet.getInt(1);
-
-                    sshDownCount = resultSet.getInt(2);
-
+                    list.add(resultSet.getInt(2));
                 }
-
-                list.add(sshUpCount);
-
-                list.add(sshDownCount);
-
             }
 
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingSSHFetchAvailabilityData method...");
             }
 
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("PollingDao pollingSSHFetchAvailabilityData method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return list;
     }
 
-    public List pollingDaoGetPingAvailabilityData(int id)
+    public List<Integer> pollingPingFetchAvailabilityData(int id)
     {
         List<Integer> list = null;
-
-        int pingUpCount = 0;
-
-        int pingDownCount = 0;
 
         ResultSet resultSet;
 
@@ -332,7 +254,8 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+
+            con = ConnectionPool.getConnection();
 
             list = new ArrayList<>();
 
@@ -347,58 +270,39 @@ public class PollingDao
 
                 while (resultSet.next())
                 {
+                    list.add(resultSet.getInt(1));
 
-                    pingUpCount = resultSet.getInt(1);
-
-                    pingDownCount = resultSet.getInt(2);
-
+                    list.add(resultSet.getInt(2));
                 }
-
-                list.add(pingUpCount);
-
-                list.add(pingDownCount);
-
             }
 
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingPingFetchAvailabilityData method...");
             }
 
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
-
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
-
+            _logger.error("PollingDao pollingPingFetchAvailabilityData method having error. ", exception);
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return list;
     }
 
-    public List pollingDaoGetPingData(int id)
+    public List<Object> pollingFetchPingData(int id)
     {
         List<Object> list = null;
-
-        int sendPacket = 0;
-
-        int receivepacket = 0;
-
-        int packetLoss = 0;
-
-        float rtt = 0;
-
-        Timestamp timestamp = null;
 
         ResultSet resultSet;
 
@@ -408,7 +312,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             list = new ArrayList<>();
 
@@ -424,67 +328,47 @@ public class PollingDao
                 while (resultSet.next())
                 {
 
-                    sendPacket = resultSet.getInt(1);
+                    list.add(resultSet.getInt(1));
 
-                    receivepacket = resultSet.getInt(2);
+                    list.add(resultSet.getInt(2));
 
-                    packetLoss = resultSet.getInt(3);
+                    list.add(resultSet.getInt(3));
 
-                    rtt = resultSet.getFloat(4);
+                    list.add(resultSet.getFloat(4));
 
-                    timestamp = resultSet.getTimestamp(5);
-
-                    list.add(sendPacket);
-
-                    list.add(receivepacket);
-
-                    list.add(packetLoss);
-
-                    list.add(rtt);
-
-                    list.add(timestamp);
+                    list.add(resultSet.getTimestamp(5));
                 }
             }
 
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingFetchPingData method...");
             }
 
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("PollingDao pollingFetchPingData method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return list;
     }
 
-    public List pollingDaoGetSSHData(int id)
+    public List<Object> pollingFetchSSHData(int id)
     {
         List<Object> list = null;
-
-        float cpu = 0;
-
-        float memory = 0;
-
-        float swapMemory = 0;
-
-        float disk = 0;
-
-        Timestamp sshTimestamp = null;
 
         ResultSet resultSet;
 
@@ -494,7 +378,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             list = new ArrayList<>();
 
@@ -509,53 +393,40 @@ public class PollingDao
 
                 while (resultSet.next())
                 {
+                    list.add(resultSet.getFloat(1));
 
-                    cpu = resultSet.getFloat(1);
+                    list.add(resultSet.getFloat(2));
 
-                    memory = resultSet.getFloat(2);
+                    list.add(resultSet.getFloat(3));
 
-                    disk = resultSet.getFloat(3);
+                    list.add(resultSet.getFloat(4));
 
-                    swapMemory  =resultSet.getFloat(4);
-
-                    sshTimestamp = resultSet.getTimestamp(5);
-
+                    list.add(resultSet.getTimestamp(5));
                 }
-
-                list.add(cpu);
-                list.add(memory);
-                list.add(disk);
-                list.add(swapMemory);
-                list.add(sshTimestamp);
             }
 
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingFetchSSHData method...");
             }
 
         }
-
-        catch (SQLException e)
+        catch (SQLException exception)
         {
-
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
-
+            _logger.error("PollingDao pollingFetchSSHData method having error. ", exception);
         }
-
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return list;
     }
 
-    public Map pollingDaoGetPingRttData(int id)
+    public Map<Timestamp, Float> pollingPingFetchRttData(int id)
     {
         Map<Timestamp, Float> mapofRtt = null;
 
@@ -571,13 +442,12 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             mapofRtt = new LinkedHashMap<>();
 
             if ( con != null)
             {
-
                 preparedStatement = con.prepareStatement("SELECT RTT, PollingTime FROM PingPolling where Id=? ORDER BY PollingTime DESC LIMIT 10;");
 
                 preparedStatement.setInt(1, id);
@@ -586,43 +456,34 @@ public class PollingDao
 
                 while (resultSet.next())
                 {
-
                     rtt = resultSet.getFloat(1);
 
                     sshTimestamp = resultSet.getTimestamp(2);
 
                     mapofRtt.put(sshTimestamp, rtt);
                 }
-
             }
-
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingPingFetchRttData method...");
             }
-
         }
-
-        catch (SQLException e)
+        catch (SQLException exception)
         {
-
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
-
+            _logger.error("PollingDao pollingFetchRttData method having error. ", exception);
         }
-
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return mapofRtt;
     }
 
-    public Map pollingDaoGetSSHCpuData(int id)
+    public Map<Timestamp, Float> pollingSSHFetchCpuData(int id)
     {
         Map<Timestamp, Float> map = null;
 
@@ -638,7 +499,7 @@ public class PollingDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             map = new LinkedHashMap<>();
 
@@ -660,30 +521,21 @@ public class PollingDao
 
                     map.put(sshTimestamp, cpu);
                 }
-
             }
-
             else
             {
-                System.out.println("Connection is not established");
+                _logger.info("Connection not established PollingDao pollingSSHFetchCpuData method...");
             }
-
         }
-
-        catch (SQLException e)
+        catch (SQLException exception)
         {
-
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
-
+            _logger.error("PollingDao pollingSSHFetchCpuData method having error. ", exception);
         }
-
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
         }
 
         return map;

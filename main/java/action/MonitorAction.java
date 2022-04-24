@@ -3,6 +3,8 @@ package action;
 import bean.MonitorBean;
 import com.opensymphony.xwork2.ModelDriven;
 import executor.MonitorExecutor;
+import helper.Logger;
+import helper.MultipleDiscovery;
 
 /**
  * Created by smit on 20/3/22.
@@ -13,41 +15,44 @@ public class MonitorAction implements ModelDriven
 
     private MonitorBean monitorBean = new MonitorBean();
 
+    private static final Logger _logger = new Logger();
+
     public String provision()
     {
-
         try
         {
-
-            MonitorExecutor monitorExecutor = new MonitorExecutor();
-
-            if(monitorExecutor.deviceProvision(monitorBean))
+            if(MultipleDiscovery.multipleDiscoveryAddInQueue(monitorBean.getId()))
             {
+                monitorBean.setStatus("Added to queue");
+
                 return "success";
             }
 
             else
             {
+                monitorBean.setStatus("Not Added to queue");
+
                 return "failure";
             }
 
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("MonitorAction provision method having error. ", exception);
+
         }
 
         return "failure";
     }
 
-    public String monitorActionGetAllData()
+    public String monitorFetchAllData()
     {
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            if(monitorExecutor.monitorExecutorGetAllData(monitorBean))
+            if(monitorExecutor.monitorFetchAllData(monitorBean))
             {
                 return "success";
             }
@@ -58,38 +63,42 @@ public class MonitorAction implements ModelDriven
 
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("MonitorAction provision method having error. ", exception);
+
         }
 
         return "failure";
     }
 
-    public String monitorActionDelete()
+    public String monitorDelete()
     {
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            monitorExecutor.monitorExecutorDelete(monitorBean);
+            if(monitorExecutor.monitorDelete(monitorBean))
+            {
+                return "success";
+            }
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("MonitorAction monitorDelete method having error. ", exception);
         }
 
-        return "success";
+        return "failure";
     }
 
-    public String monitorActionGetChartData()
+    public String monitorFetchChartData()
     {
 
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
 
-            if(monitorExecutor.monitorExecutorGetChartsData(monitorBean))
+            if(monitorExecutor.monitorFetchChartData(monitorBean))
             {
                 return "success";
             }
@@ -97,12 +106,10 @@ public class MonitorAction implements ModelDriven
             {
                 return "failure";
             }
-
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("MonitorAction monitorFetchChartData method having error. ", exception);
         }
 
         return "failure";

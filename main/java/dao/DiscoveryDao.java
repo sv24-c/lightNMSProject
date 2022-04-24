@@ -1,5 +1,7 @@
 package dao;
 
+import helper.ConnectionPool;
+import helper.Logger;
 import org.apache.commons.codec.binary.Base64;
 
 import java.sql.*;
@@ -10,136 +12,81 @@ import java.util.*;
  */
 public class DiscoveryDao
 {
-    static
-    {
-        try
-        {
-            Class.forName("com.mysql.cj.jdbc.Driver");
+    private static final Logger _logger = new Logger();
 
-        }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-    }
+    private boolean verifyStatus = false;
 
-    private Connection makeConnection()
+    public boolean discoveryInsert(String name, String ip, String type, String username, String encodedPassword)
     {
         Connection con = null;
 
-        try
-        {
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
-
-        }
-
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return con;
-    }
-
-    private void closeConnection(PreparedStatement preparedStatement, Connection connection)
-    {
-        try
-        {
-
-            if (preparedStatement != null || !preparedStatement.isClosed())
-            {
-                preparedStatement.close();
-            }
-
-            if (connection != null || !connection.isClosed())
-            {
-                connection.close();
-            }
-
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean discoveryDaoInsertData(String name, String ip, String type, String username, String password)
-    {
-        Connection con = null;
-
-        PreparedStatement preparedStatementOfInsert = null;
+        PreparedStatement preparedStatement = null;
 
         try
         {
-            con = makeConnection();
-
-            Base64 base64 = new Base64();
-
-            String encodedPassword = new String(base64.encode(password.getBytes()));
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("INSERT INTO Discovery (Name, IP, Type, Username, Password) VALUES(?,?,?,?,?)");
+                preparedStatement = con.prepareStatement("INSERT INTO Discovery (Name, IP, Type, Username, Password) VALUES(?,?,?,?,?)");
 
-                preparedStatementOfInsert.setString(1, name);
+                preparedStatement.setString(1, name);
 
-                preparedStatementOfInsert.setString(2, ip);
+                preparedStatement.setString(2, ip);
 
-                preparedStatementOfInsert.setString(3, type);
+                preparedStatement.setString(3, type);
 
-                preparedStatementOfInsert.setString(4, username);
+                preparedStatement.setString(4, username);
 
-                preparedStatementOfInsert.setString(5, encodedPassword);
+                preparedStatement.setString(5, encodedPassword);
 
-                preparedStatementOfInsert.executeUpdate();
+                preparedStatement.executeUpdate();
 
                 return true;
             }
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
-
-            System.out.println(Arrays.toString(e.getStackTrace()));
+            _logger.error("DiscoveryDao discoveryInsert method having error. ", exception);
 
         }
 
         finally
         {
-             closeConnection(preparedStatementOfInsert, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return false;
     }
 
-    public List discoveryDaoGetData()
+    public List<Map<String, Object>> discoveryFetchData()
     {
-        ResultSet resultSet;
-
         Connection con = null;
 
         PreparedStatement preparedStatement = null;
 
-        List<Map<String, Object>> list = null;
+        ResultSet resultSet = null;
+
+        List<Map<String, Object>> discoveryFetchDataList = null;
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
-            list = new ArrayList<>();
+            discoveryFetchDataList = new ArrayList<>();
 
             if ( con != null)
             {
-
                 preparedStatement = con.prepareStatement("SELECT Id, Name, IP, Type FROM Discovery");
 
                 resultSet = preparedStatement.executeQuery();
 
                 while (resultSet.next())
                 {
-
                     Map<String, Object> map = new LinkedHashMap<String, Object>();
 
                     map.put("Id", resultSet.getInt(1));
@@ -150,46 +97,34 @@ public class DiscoveryDao
 
                     map.put("Type", resultSet.getString(4));
 
-                    list.add(map);
-
+                    discoveryFetchDataList.add(map);
                 }
             }
         }
-
-        catch (SQLException e)
+        catch (SQLException exception)
         {
-
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
-
+            _logger.error("DiscoveryDao discoveryFetchData method having error. ", exception);
         }
-
         finally
         {
-            closeConnection(preparedStatement, con);
-        }
+            ConnectionPool.closePreparedStatement(preparedStatement);
 
-        return list;
+            ConnectionPool.releaseConnection(con);
+        }
+        return discoveryFetchDataList;
     }
 
-    public List discoveryDaoCheckRedundantData(String ip, String type)
+    public boolean discoveryCheckDuplicateData(String ip, String type)
     {
-        ResultSet resultSet;
-
         Connection con = null;
 
         PreparedStatement preparedStatement = null;
 
-        List<String> list = null;
+        ResultSet resultSet = null;
 
         try
         {
-            con = makeConnection();
-
-            list = new ArrayList<>();
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
@@ -204,47 +139,44 @@ public class DiscoveryDao
 
                 while (resultSet.next())
                 {
-
-                    list.add(resultSet.getString(1));
-
-                    list.add(resultSet.getString(2));
+                    verifyStatus = true;
 
                 }
             }
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("DiscoveryDao discoveryCheckDuplicateData method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
-        return list;
+        return verifyStatus;
     }
 
-    public String discoveryDaoGetUsernameData(int id)
+    public String discoveryFetchUsername(int id)
     {
-        String userName=null;
-
-        ResultSet resultSet;
-
         Connection con = null;
 
         PreparedStatement preparedStatement = null;
 
+        ResultSet resultSet = null;
+
+        String username=null;
+
         try
         {
-            con = makeConnection();
+
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
@@ -258,48 +190,44 @@ public class DiscoveryDao
                 while (resultSet.next())
                 {
 
-                    userName = resultSet.getString(1);
+                    username = resultSet.getString(1);
 
                 }
             }
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("DiscoveryDao discoveryFetchUsername method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
-        return userName;
+        return username;
     }
 
-    public List discoveryDaoGetUsernamePasswordData(int id)
+    public List<String> discoveryFetchUsernamePassword(int id)
     {
-        String userName=null;
-
-        String password=null;
-
-        ResultSet resultSet;
-
         Connection con = null;
 
         PreparedStatement preparedStatement = null;
+
+        ResultSet resultSet = null;
 
         List<String> list = null;
 
         try
         {
-            con = makeConnection();
+
+            con = ConnectionPool.getConnection();
 
             list = new ArrayList<>();
 
@@ -314,110 +242,103 @@ public class DiscoveryDao
 
                 while (resultSet.next())
                 {
+                    list.add(resultSet.getString(1));
 
-                    userName = resultSet.getString(1);
-
-                    list.add(userName);
-
-                    password = resultSet.getString(2);
-
-                    list.add(password);
+                    list.add(resultSet.getString(2));
                 }
 
             }
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
+            _logger.error("DiscoveryDao discoveryFetchUsernamePassword method having error. ", exception);
 
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return list;
     }
 
-    public boolean discoveryDaoUpdateData(String name, String ip, String username, String password, int id)
+    public boolean discoveryUpdate(String name, String ip, String username, String password, int id)
     {
         Connection con = null;
 
-        PreparedStatement preparedStatementOfUpdate = null;
+        PreparedStatement preparedStatement = null;
 
         try
         {
-            con = makeConnection();
-
+            con = ConnectionPool.getConnection();
+            
             if ( con != null)
             {
                 Base64 base64 = new Base64();
 
                 String encodedPassword = new String(base64.encode(password.getBytes()));
 
-                preparedStatementOfUpdate = con.prepareStatement("UPDATE Discovery SET Name=? , IP=? , Username=? , Password=? where Id=?");
+                preparedStatement = con.prepareStatement("UPDATE Discovery SET Name=? , IP=? , Username=? , Password=? where Id=?");
 
-                preparedStatementOfUpdate.setString(1, name);
+                preparedStatement.setString(1, name);
 
-                preparedStatementOfUpdate.setString(2, ip);
+                preparedStatement.setString(2, ip);
 
-                preparedStatementOfUpdate.setString(3, username);
+                preparedStatement.setString(3, username);
 
-                preparedStatementOfUpdate.setString(4, encodedPassword);
+                preparedStatement.setString(4, encodedPassword);
 
-                preparedStatementOfUpdate.setInt(5, id);
+                preparedStatement.setInt(5, id);
 
-                preparedStatementOfUpdate.executeUpdate();
+                preparedStatement.executeUpdate();
 
-                return true;
-            }
+                verifyStatus = true;
 
-            else
-            {
-                return false;
             }
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
-
-            System.out.println(Arrays.toString(e.getStackTrace()));
+            _logger.error("DiscoveryDao discoveryUpdate method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatementOfUpdate, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
-        return false;
+        return verifyStatus;
     }
 
-    public boolean discoveryDaoDeleteData(int id)
+    public boolean discoveryDelete(int id)
     {
+
         Connection con = null;
 
-        PreparedStatement preparedStatementOfDelete = null;
+        PreparedStatement preparedStatement = null;
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
-                preparedStatementOfDelete = con.prepareStatement("DELETE FROM Discovery WHERE Id = ?");
+                preparedStatement = con.prepareStatement("DELETE FROM Discovery WHERE Id = ?");
 
-                preparedStatementOfDelete.setInt(1, id);
+                preparedStatement.setInt(1, id);
 
-                preparedStatementOfDelete.executeUpdate();
+                preparedStatement.executeUpdate();
 
                 return true;
             }
@@ -428,17 +349,19 @@ public class DiscoveryDao
             }
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
+            _logger.error("DiscoveryDao discoveryDelete method having error. ", exception);
 
-            System.out.println(Arrays.toString(e.getStackTrace()));
 
         }
 
         finally
         {
-            closeConnection(preparedStatementOfDelete, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return false;

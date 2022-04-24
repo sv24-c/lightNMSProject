@@ -1,10 +1,7 @@
 package bean;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by smit on 20/3/22.
@@ -17,6 +14,7 @@ public class MonitorBean
     private int id;
     private String availability;
 
+    private String ipForChart;
     String status;
 
     float cpu;
@@ -25,17 +23,17 @@ public class MonitorBean
 
     private List<MonitorBean> monitorBeanList = new ArrayList<>();
 
-    private List<Object> matrixList = new ArrayList<>();
+    private List<HashMap<String, Object>> matrixList = new ArrayList<>();
 
-    private List<Object> sshMatrixList = new ArrayList<>();
+    private List<HashMap<String, Object>> sshMatrixList = new ArrayList<>();
 
-    private List<Integer> pingStatusList = new ArrayList<>();
+    private List<HashMap<String, Object>> pingStatusList = new ArrayList<>();
 
-    private List<Integer> sshStatusList = new ArrayList<>();
+    private List<HashMap<String, Object>> sshStatusList = new ArrayList<>();
 
-    private Map<Timestamp, Float> cpuMap = new LinkedHashMap<>();
+    private List<HashMap<String, Object>> cpuMap = new ArrayList<>();
 
-    private Map<Timestamp, Float> rttMap = new LinkedHashMap<>();
+    private List<HashMap<String, Object>> rttMap = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -117,51 +115,60 @@ public class MonitorBean
         this.monitorBeanList = monitorBeanList;
     }
 
-    public List<Object> getMatrixList() {
+    public List<HashMap<String, Object>> getMatrixList() {
         return matrixList;
     }
 
-    public void setMatrixList(List<Object> matrixList) {
+    public void setMatrixList(List<HashMap<String, Object>> matrixList) {
         this.matrixList = matrixList;
     }
 
-    public List<Object> getSshMatrixList() {
+    public List<HashMap<String, Object>> getSshMatrixList() {
         return sshMatrixList;
     }
 
-    public void setSshMatrixList(List<Object> sshMatrixList) {
+    public void setSshMatrixList(List<HashMap<String, Object>> sshMatrixList) {
         this.sshMatrixList = sshMatrixList;
     }
 
-    public List<Integer> getSshStatusList() {
+    public List<HashMap<String, Object>> getSshStatusList() {
         return sshStatusList;
     }
 
-    public void setSshStatusList(List<Integer> sshStatusList) {
+    public void setSshStatusList(List<HashMap<String, Object>> sshStatusList) {
         this.sshStatusList = sshStatusList;
     }
 
-    public List<Integer> getPingStatusList() {
+    public List<HashMap<String, Object>> getPingStatusList() {
         return pingStatusList;
     }
 
-    public void setPingStatusList(List<Integer> pingStatusList) {
+    public void setPingStatusList(List<HashMap<String, Object>> pingStatusList) {
         this.pingStatusList = pingStatusList;
     }
 
-    public Map<Timestamp, Float> getCpuMap() {
+    public List<HashMap<String, Object>> getCpuMap() {
         return cpuMap;
     }
 
-    public void setCpuMap(Map<Timestamp, Float> cpuMap) {
+    public void setCpuMap(List<HashMap<String, Object>> cpuMap) {
         this.cpuMap = cpuMap;
     }
 
-    public Map<Timestamp, Float> getRttMap() {
+    public List<HashMap<String, Object>> getRttMap() {
         return rttMap;
     }
 
-    public void setRttMap(Map<Timestamp, Float> rttMap) {
+    public void setRttMap(List<HashMap<String, Object>> rttMap) {
         this.rttMap = rttMap;
     }
+
+    public String getIpForChart() {
+        return ipForChart;
+    }
+    public void setIpForChart(String ipForChart) {
+        this.ipForChart = ipForChart;
+    }
+
+
 }

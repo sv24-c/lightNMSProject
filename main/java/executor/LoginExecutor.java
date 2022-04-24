@@ -1,85 +1,50 @@
 package executor;
 
-import dao.LoginDao;
+import dao.Database;
+import helper.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- * Created by smit on 11/3/22.
+ * Created by smit on 23/4/22.
  */
 public class LoginExecutor
 {
+    List<HashMap<String, Object>> loginListHashMap = null;
 
+    Database database = new Database();
 
-    private LoginDao loginDao = new LoginDao();
+    private static final Logger _logger = new Logger();
 
-    public boolean login(String userName, String password)
+    private ArrayList<Object> data = null;
+
+    public boolean logIn(String userName, String password)
     {
-
-        List<Map<String, Object>> list;
-
-        list = loginDao.logIn(userName, password);
-
-        //Map<String, Object> mapData = list.get(0);
-
-        Map<String, Object> mapData = null;
-
-        String uname = null;
-
-        String pass = null;
+        boolean verifyStatus = false;
 
         try
         {
-            if (list !=null && list.size() != 0)
+            data = new ArrayList<>();
+
+            data.add(userName);
+
+            data.add(password);
+
+            loginListHashMap = database.fireSelectQuery("SELECT UserName , Password FROM Login where UserName LIKE BINARY ? AND Password LIKE BINARY ? ", data);
+
+            if (loginListHashMap != null && !loginListHashMap.isEmpty())
             {
-                mapData = list.get(0);
+                verifyStatus = true;
             }
-
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("Credential is not valid!", exception);
         }
-
-        try
-        {
-            if (mapData != null)
-            {
-                uname = String.valueOf(mapData.get("UserName"));
-            }
-
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        try
-        {
-            if (mapData != null)
-            {
-                pass = String.valueOf(mapData.get("Password"));
-            }
-
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-        try
-        {
-
-            if (uname != null)
-            {
-                return uname.equals(userName) && pass.equals(password);
-            }
-
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return false;
+        return verifyStatus;
     }
+
+
 }

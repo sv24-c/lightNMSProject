@@ -8,11 +8,11 @@ import java.util.List;
  */
 public class DiscoveryBean
 {
-    private String Name;
+    private String name;
     private String IP;
-    private String Type;
-    private String Username;
-    private String Password;
+    private String type;
+    private String username;
+    private String password;
     private int id;
 
     String status;
@@ -28,11 +28,11 @@ public class DiscoveryBean
     private List<DiscoveryBean> discoveryBeanList = new ArrayList<>();
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public void setName(String name) {
-        Name = name;
+        this.name = name;
     }
 
     public String getIP() {
@@ -44,28 +44,28 @@ public class DiscoveryBean
     }
 
     public String getType() {
-        return Type;
+        return type;
     }
 
     public void setType(String type) {
-        Type = type;
+        this.type = type;
     }
 
     public String getUsername() {
-        return Username;
+        return username;
     }
 
     public boolean setUsername(String username) {
-        Username = username;
+        this.username = username;
         return true;
     }
 
     public String getPassword() {
-        return Password;
+        return password;
     }
 
     public void setPassword(String password) {
-        Password = password;
+        this.password = password;
     }
 
     public String getStatus() {

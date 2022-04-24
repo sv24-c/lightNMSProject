@@ -7,19 +7,18 @@ import org.quartz.*;
  */
 public class PollingHelper implements Job
 {
+    private static Logger _logger = new Logger();
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
     {
-
         try
         {
             new PollingRunnable().pollingRunnableMethod();
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("PollingHelper execute method having error. ", exception);
         }
     }
 }

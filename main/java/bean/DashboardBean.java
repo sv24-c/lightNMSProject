@@ -1,7 +1,6 @@
 package bean;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by smit on 31/3/22.
@@ -9,13 +8,23 @@ import java.util.List;
 public class DashboardBean
 {
 
-    private List<Integer> dashboardList = new ArrayList<>();
+    private List<HashMap<String, Object>> dashboardList = new ArrayList<>();
 
-    public List<Integer> getDashboardList() {
+    private List<HashMap<String, Object>> topFiveCpuData = new ArrayList<>();
+
+    public List<HashMap<String, Object>> getDashboardList() {
         return dashboardList;
     }
 
-    public void setDashboardList(List<Integer> dashboardList) {
+    public void setDashboardList(List<HashMap<String, Object>> dashboardList) {
         this.dashboardList = dashboardList;
+    }
+
+    public List<HashMap<String, Object>> getTopFiveCpuData() {
+        return topFiveCpuData;
+    }
+
+    public void setTopFiveCpuData(List<HashMap<String, Object>> topFiveCpuData) {
+        this.topFiveCpuData = topFiveCpuData;
     }
 }

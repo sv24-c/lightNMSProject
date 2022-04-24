@@ -1,180 +1,123 @@
 package dao;
 
+import helper.ConnectionPool;
+import helper.Logger;
+
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by smit on 22/3/22.
  */
 public class MonitorDao
 {
-    static
+
+    private static Logger _logger = new Logger();
+
+    public boolean monitorCheckDuplicateData(String ip, String type)
     {
-        try
-        {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-        }
-        catch (ClassNotFoundException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    private Connection makeConnection()
-    {
-        Connection con = null;
-
-        try
-        {
-
-            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
-
-        }
-
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-
-        return con;
-    }
-
-    private void closeConnection(PreparedStatement preparedStatement, Connection connection)
-    {
-        try
-        {
-
-            if (preparedStatement != null || !preparedStatement.isClosed())
-            {
-                preparedStatement.close();
-            }
-
-            if (connection != null || !connection.isClosed())
-            {
-                connection.close();
-
-            }
-
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    public boolean monitorDaoGetData(int id)
-    {
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         Connection con = null;
 
         PreparedStatement preparedStatement = null;
 
-        int checkId=0;
-
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
 
-                preparedStatement = con.prepareStatement("SELECT Id FROM Monitor where Id = ?");
+                preparedStatement = con.prepareStatement("SELECT Id FROM Monitor WHERE IP = ? AND Type = ?");
 
-                preparedStatement.setInt(1, id);
+                preparedStatement.setString(1, ip);
+
+                preparedStatement.setString(2, type);
 
                 resultSet = preparedStatement.executeQuery();
 
-                while (resultSet.next())
-                {
-
-                   checkId = resultSet.getInt(1);
-
-                }
-
-                if (checkId == id)
+                if (resultSet.next())
                 {
                     return true;
                 }
+
             }
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
+            _logger.error("MonitorDao monitorCheckDuplicateData method having error. ", exception);
 
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return false;
     }
 
-    public String monitorDaoInsert(int id, String name, String ip, String type)
+    public String monitorInsert(int id, String name, String ip, String type)
     {
+        String availability;
+
         Connection con = null;
 
-        PreparedStatement preparedStatementOfInsert = null;
-
-        String availability;
+        PreparedStatement preparedStatement = null;
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             availability = "unknown";
 
             if ( con != null)
             {
-                preparedStatementOfInsert = con.prepareStatement("INSERT INTO Monitor (Id, Name, IP, Type, Availability) VALUES(?,?,?,?,?)");
+                preparedStatement = con.prepareStatement("INSERT INTO Monitor (Id, Name, IP, Type, Availability) VALUES(?,?,?,?,?)");
 
-                preparedStatementOfInsert.setInt(1, id);
+                preparedStatement.setInt(1, id);
 
-                preparedStatementOfInsert.setString(2, name);
+                preparedStatement.setString(2, name);
 
-                preparedStatementOfInsert.setString(3, ip);
+                preparedStatement.setString(3, ip);
 
-                preparedStatementOfInsert.setString(4, type);
+                preparedStatement.setString(4, type);
 
-                preparedStatementOfInsert.setString(5, availability);
+                preparedStatement.setString(5, availability);
 
-                preparedStatementOfInsert.executeUpdate();
+                preparedStatement.executeUpdate();
 
             }
 
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
+            _logger.error("MonitorDao monitorInsert method having error. ", exception);
 
-            System.out.println(e.getStackTrace());
 
         }
 
         finally
         {
-            closeConnection(preparedStatementOfInsert, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
         }
 
         return null;
     }
 
-    public List monitorDaoGetAllData()
+    public List<Map<String, Object>> monitorFetchAllData()
     {
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         Connection con = null;
 
@@ -184,7 +127,7 @@ public class MonitorDao
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             list = new ArrayList<>();
 
@@ -216,63 +159,60 @@ public class MonitorDao
             }
         }
 
-        catch (SQLException e)
+        catch (Exception exception)
         {
 
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("MonitorDao monitorFetchAllData method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
         return list;
     }
 
-    public boolean monitorDaoDeleteData(int id)
+    public boolean monitorDelete(int id)
     {
         Connection con = null;
 
-        PreparedStatement preparedStatementOfDelete = null;
+        PreparedStatement preparedStatement = null;
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
-                preparedStatementOfDelete = con.prepareStatement("DELETE FROM Monitor WHERE Id = ?");
+                preparedStatement = con.prepareStatement("DELETE FROM Monitor WHERE Id = ?");
 
-                preparedStatementOfDelete.setInt(1, id);
+                preparedStatement.setInt(1, id);
 
-                preparedStatementOfDelete.executeUpdate();
+                preparedStatement.executeUpdate();
 
                 return true;
             }
-
             else
             {
                 return false;
             }
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
-
-            System.out.println(e.getStackTrace());
-
+            _logger.error("MonitorDao monitorDelete method having error. ", exception);
         }
 
         finally
         {
-            closeConnection(preparedStatementOfDelete, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
         }
 
         return false;
@@ -286,11 +226,12 @@ public class MonitorDao
 
         try
         {
-            con = makeConnection();
+            //con = makeConnection();
+
+            con = ConnectionPool.getConnection();
 
             if ( con != null)
             {
-
                 preparedStatementOfUpdate = con.prepareStatement("UPDATE Monitor SET Availability=? where Id=?");
 
                 preparedStatementOfUpdate.setString(1, availability);
@@ -302,42 +243,42 @@ public class MonitorDao
             }
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            System.out.println(e.getMessage());
 
-            System.out.println(e.getStackTrace());
+            _logger.error("MonitorDao monitorAvailabilityUpdate method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatementOfUpdate, con);
+
+            ConnectionPool.closePreparedStatement(preparedStatementOfUpdate);
+
+            ConnectionPool.releaseConnection(con);
+
         }
 
     }
 
-    public List<String> monitorDaoGetDataForProvision(int id)
+    public List<String> monitorFetchDataForProvision(int id)
     {
-        ResultSet resultSet;
+        ResultSet resultSet = null;
 
         Connection con = null;
 
         PreparedStatement preparedStatement = null;
 
-        int resultid = 0;
-
         List<String> dataList = null;
 
         try
         {
-            con = makeConnection();
+            con = ConnectionPool.getConnection();
 
             dataList = new ArrayList<>();
 
             if ( con != null)
             {
-
                 preparedStatement = con.prepareStatement("SELECT Name, IP, Type, Username, Password FROM Discovery where Id = ?");
 
                 preparedStatement.setInt(1, id);
@@ -347,31 +288,79 @@ public class MonitorDao
                 while (resultSet.next())
                 {
                     dataList.add(resultSet.getString(1));
+
                     dataList.add(resultSet.getString(2));
+
                     dataList.add(resultSet.getString(3));
+
                     dataList.add(resultSet.getString(4));
+
                     dataList.add(resultSet.getString(5));
                 }
             }
         }
 
-        catch (SQLException e)
+        catch (SQLException exception)
         {
-
-            System.out.println("SQL State: "+ e.getSQLState());
-
-            System.out.println("Error Code "+ e.getErrorCode());
-
-            System.out.println(e.getMessage());
+            _logger.error("MonitorDao monitorFetchDataForProvision method having error. ", exception);
 
         }
 
         finally
         {
-            closeConnection(preparedStatement, con);
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
         }
 
         return dataList;
+    }
+
+    public String monitorFetchIp(int id)
+    {
+        ResultSet resultSet = null;
+
+        Connection con = null;
+
+        PreparedStatement preparedStatement = null;
+
+        String ipForChart = null;
+
+        try
+        {
+           con = ConnectionPool.getConnection();
+
+            if ( con != null)
+            {
+
+                preparedStatement = con.prepareStatement("SELECT IP FROM Monitor where Id = ?");
+
+                preparedStatement.setInt(1, id);
+
+                resultSet = preparedStatement.executeQuery();
+
+                while (resultSet.next())
+                {
+                    ipForChart = resultSet.getString(1);
+                }
+            }
+        }
+
+        catch (SQLException exception)
+        {
+
+            _logger.error("MonitorDao monitorFetchIp method having error. ", exception);
+
+        }
+
+        finally
+        {
+            ConnectionPool.closePreparedStatement(preparedStatement);
+
+            ConnectionPool.releaseConnection(con);
+        }
+
+        return ipForChart;
     }
 }
 

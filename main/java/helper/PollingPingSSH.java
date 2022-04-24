@@ -3,10 +3,11 @@ package helper;
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+import dao.Database;
 import dao.MonitorDao;
 import dao.PollingDao;
 import org.apache.commons.codec.binary.Base64;
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -18,30 +19,45 @@ import java.util.List;
  */
 public class PollingPingSSH implements Runnable
 {
-    List<Object> pingResultList = new ArrayList<>();
+    private static Logger _logger = new Logger();
 
-    List<String> pinglist = new ArrayList<>();
+    private Database database = new Database();
 
-    List<String> commandList = new ArrayList<>();
+    private ArrayList<Object> data = null;
 
-    List<Object> pingExecuteResult = new ArrayList<>();
+    private List<Object> pingResultList = new ArrayList<>();
+
+    private List<String> pinglist = new ArrayList<>();
+
+    private List<String> commandList = new ArrayList<>();
+
+    private List<Object> pingExecuteResult = new ArrayList<>();
 
     PollingDao pollingDao = new PollingDao();
 
     MonitorDao monitorDao = new MonitorDao();
 
-    String availability = "Up";
+    private String availability = "Up";
 
-    int id;
-    String username;
-    String password;
-    String ip;
-    String type;
+    private String availabilityStatus = "Down";
 
-    double cpu;
-    double usedMemory;
-    float swapfreeMemory;
-    float disk;
+    private int id;
+
+    private String username;
+
+    private String password;
+
+    private String ip;
+
+    private String type;
+
+    private double cpu;
+
+    private double usedMemory;
+
+    private float swapfreeMemory;
+
+    private float disk;
 
     public PollingPingSSH(String username, String password, String ip, int id, String type)
     {
@@ -54,14 +70,11 @@ public class PollingPingSSH implements Runnable
         this.id = id;
 
         this.type = type;
-
-        System.out.println("Hey "+this.ip);
     }
 
     @Override
-    public void run() {
-
-        System.out.println("Hello "+this.ip);
+    public void run()
+    {
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -69,132 +82,185 @@ public class PollingPingSSH implements Runnable
 
         try
         {
+            pingExecuteResult = ping(ip);
 
-            if (type.equals("Ping"))
+            if (pingResultList !=null && !pingResultList.isEmpty())
             {
-                pingExecuteResult = ping(ip);
-
-                int packetSend = (int) pingExecuteResult.get(0);
-
-                int packetReceive = (int) pingExecuteResult.get(1);
-
-                int packetLoss = (int) pingExecuteResult.get(2);
-
-                float rtt = (float) pingExecuteResult.get(3);
-
-
-                if (packetLoss <= 20)
+                if (type.equals(CommonConstant.DEVICETYPEPING))
                 {
-                    monitorDao.monitorAvailabilityUpdate(availability, id);
+                    int packetSend = (int) pingExecuteResult.get(0);
 
-                    pollingDao.pollingDaoPingInsertData(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp, availability);
+                    int packetReceive = (int) pingExecuteResult.get(1);
 
-                }
-                else if (packetLoss ==100)
-                {
-                    String availabilityStatus = "Down";
+                    int packetLoss = (int) pingExecuteResult.get(2);
 
-                    monitorDao.monitorAvailabilityUpdate(availabilityStatus, id);
+                    float rtt = (float) pingExecuteResult.get(3);
 
-                    pollingDao.pollingDaoPingInsertData(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp, availabilityStatus);
-
-                }
-
-            }
-
-            else if(type.equals("SSH"))
-            {
-                pingExecuteResult = ping(ip);
-
-                int packetLoss = (int) pingExecuteResult.get(2);
-
-                if (packetLoss <= 20)
-                {
-
-                    commandList.add("mpstat | grep all\n");
-
-                    commandList.add("free -m | grep Mem | awk '{print $3}'\n");
-
-                    commandList.add("df -ht ext4 | grep / | awk '{print $5}'\n");
-
-                    commandList.add("free -m | grep Swap | awk '{print $4}'\n");
-
-                    commandList.add("exit\n");
-
-                    String result = ssh(username, password, ip, commandList);
-
-                    if(!result.isEmpty())
+                    if (packetLoss <= CommonConstant.MINIMUMPACKETLOSS)
                     {
+                        data = new ArrayList<>();
 
-                        result = result.substring(result.lastIndexOf("mpstat | grep all"));
+                        data.add(availability);
 
-                        String manipulateCpu = result.substring(result.lastIndexOf("mpstat | grep all")+"mpstat | grep all".length() , result.indexOf(username+"@"));
+                        data.add(id);
 
-                        String[] cpuResult = manipulateCpu.split(" ");
+                        database.fireExecuteUpdate("UPDATE Monitor SET Availability=? where Id=?", data);
 
-                        cpu = 100 - (Double.parseDouble(cpuResult[cpuResult.length -1]));
 
-                        result = result.substring(result.lastIndexOf("free -m | grep Mem | awk '{print $3}'"));
+                        data = new ArrayList<>();
 
-                        String memory = result.substring(result.lastIndexOf("free -m | grep Mem | awk '{print $3}'")+"free -m | grep Mem | awk '{print $3}'".length() , result.indexOf(username+"@"));
+                        data.add(id);
+                        data.add(ip);
+                        data.add(packetSend);
+                        data.add(packetReceive);
+                        data.add(packetLoss);
+                        data.add(rtt);
+                        data.add(timestamp);
+                        data.add(availability);
 
-                        usedMemory = Double.parseDouble(memory);
+                        database.fireExecuteUpdate("INSERT INTO PingPolling (Id, IP, SendPacket, ReceivePacket, PacketLoss, RTT, PollingTime, Status) VALUES(?,?,?,?,?,?,?,?)", data);
 
-                        result = result.substring(result.lastIndexOf("df -ht ext4 | grep / | awk '{print $5}'"));
-
-                        disk = Float.parseFloat(result.substring(result.lastIndexOf("df -ht ext4 | grep / | awk '{print $5}'")+"df -ht ext4 | grep / | awk '{print $5}'".length() , result.indexOf("%"+username+"@")));
-
-                        result = result.substring(result.lastIndexOf("free -m | grep Swap | awk '{print $4}'"));
-
-                        swapfreeMemory = Float.parseFloat(result.substring(result.lastIndexOf("free -m | grep Swap | awk '{print $4}'")+"free -m | grep Swap | awk '{print $4}'".length() , result.indexOf(username+"@")));
-
-                        pollingDao.pollingDaoSSHInsertData(id, ip, cpu, usedMemory, disk, timestamp, availability, swapfreeMemory);
-
-                        monitorDao.monitorAvailabilityUpdate(availability, id);
-
+                        //pollingDao.pollingPingInsert(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp, availability);
                     }
+                    else
+                    {
+                        data = new ArrayList<>();
+                        data.add(availabilityStatus);
+                        data.add(id);
 
+                        database.fireExecuteUpdate("UPDATE Monitor SET Availability=? where Id=?",data);
+
+                        data = new ArrayList<>();
+                        data.add(id);
+                        data.add(ip);
+                        data.add(packetSend);
+                        data.add(packetReceive);
+                        data.add(packetLoss);
+                        data.add(rtt);
+                        data.add(timestamp);
+                        data.add(availabilityStatus);
+
+                        database.fireExecuteUpdate("INSERT INTO PingPolling (Id, IP, SendPacket, ReceivePacket, PacketLoss, RTT, PollingTime, Status) VALUES(?,?,?,?,?,?,?,?)" , data);
+
+                        //pollingDao.pollingPingInsert(id, ip, packetSend, packetReceive, packetLoss, rtt, timestamp, availabilityStatus);
+                    }
                 }
-                else if (packetLoss == 100)
+                else if(type.equals(CommonConstant.DEVICETYPESSH))
                 {
-                    String availabilityStatus = "Down";
+                    int packetLoss = (int) pingExecuteResult.get(2);
 
-                    monitorDao.monitorAvailabilityUpdate(availabilityStatus, id);
+                    if (packetLoss <= CommonConstant.MINIMUMPACKETLOSS)
+                    {
+                        commandList.add("mpstat | grep all\n");
 
-                    cpu = 0;
+                        commandList.add("free -m | grep Mem | awk '{print $3}'\n");
 
-                    usedMemory = 0;
+                        commandList.add("df -ht ext4 | grep / | awk '{print $5}'\n");
 
-                    swapfreeMemory = 0;
+                        commandList.add("free -m | grep Swap | awk '{print $4}'\n");
 
-                    disk = 0;
+                        commandList.add("exit\n");
 
-                    pollingDao.pollingDaoSSHInsertData(id, ip, cpu, usedMemory, disk, timestamp, availabilityStatus, swapfreeMemory);
+                        String result = ssh(username, password, ip, commandList);
 
+                        if(!result.isEmpty())
+                        {
+                            result = result.substring(result.lastIndexOf("mpstat | grep all"));
+
+                            String manipulateCpu = result.substring(result.lastIndexOf("mpstat | grep all")+"mpstat | grep all".length() , result.indexOf(username+"@"));
+
+                            String[] cpuResult = manipulateCpu.split(" ");
+
+                            cpu = 100 - (Double.parseDouble(cpuResult[cpuResult.length -1]));
+
+                            result = result.substring(result.lastIndexOf("free -m | grep Mem | awk '{print $3}'"));
+
+                            String memory = result.substring(result.lastIndexOf("free -m | grep Mem | awk '{print $3}'")+"free -m | grep Mem | awk '{print $3}'".length() , result.indexOf(username+"@"));
+
+                            usedMemory = Double.parseDouble(memory);
+
+                            result = result.substring(result.lastIndexOf("df -ht ext4 | grep / | awk '{print $5}'"));
+
+                            disk = Float.parseFloat(result.substring(result.lastIndexOf("df -ht ext4 | grep / | awk '{print $5}'")+"df -ht ext4 | grep / | awk '{print $5}'".length() , result.indexOf("%"/*+username+"@"*/)));
+
+                            result = result.substring(result.lastIndexOf("free -m | grep Swap | awk '{print $4}'"));
+
+                            swapfreeMemory = Float.parseFloat(result.substring(result.lastIndexOf("free -m | grep Swap | awk '{print $4}'")+"free -m | grep Swap | awk '{print $4}'".length() , result.indexOf(username+"@")));
+
+                            data = new ArrayList<>();
+                            data.add(id);
+                            data.add(ip);
+                            data.add(cpu);
+                            data.add(usedMemory);
+                            data.add(disk);
+                            data.add(timestamp);
+                            data.add(availability);
+                            data.add(swapfreeMemory);
+
+                            database.fireExecuteUpdate("INSERT INTO SSHPolling (Id, IP, CPU, Memory, Disk, PollingTime, Status, SwapMemory) VALUES(?,?,?,?,?,?,?,?)" , data);
+
+                            //pollingDao.pollingSSHInsert(id, ip, cpu, usedMemory, disk, timestamp, availability, swapfreeMemory);
+
+                            data = new ArrayList<>();
+                            data.add(availability);
+                            data.add(id);
+
+                            database.fireExecuteUpdate("UPDATE Monitor SET Availability=? where Id=?",data);
+
+                            //monitorDao.monitorAvailabilityUpdate(availability, id);
+                        }
+                    }
+                    else
+                    {
+                        data = new ArrayList<>();
+                        data.add(availabilityStatus);
+                        data.add(id);
+
+                        database.fireExecuteUpdate("UPDATE Monitor SET Availability=? where Id=?",data);
+
+                        cpu = 0;
+
+                        usedMemory = 0;
+
+                        swapfreeMemory = 0;
+
+                        disk = 0;
+
+                        data = new ArrayList<>();
+                        data.add(id);
+                        data.add(ip);
+                        data.add(cpu);
+                        data.add(usedMemory);
+                        data.add(disk);
+                        data.add(timestamp);
+                        data.add(availabilityStatus);
+                        data.add(swapfreeMemory);
+
+                        database.fireExecuteUpdate("INSERT INTO SSHPolling (Id, IP, CPU, Memory, Disk, PollingTime, Status, SwapMemory) VALUES(?,?,?,?,?,?,?,?)" , data);
+
+                        //pollingDao.pollingSSHInsert(id, ip, cpu, usedMemory, disk, timestamp, availabilityStatus, swapfreeMemory);
+                    }
                 }
                 else
                 {
-                    System.out.println("Host Unreachable");
+                    _logger.info("PollingPingSSH Device Type Would be Ping or SSH Only");
                 }
             }
-
             else
             {
-                System.out.println("Device Type Would be Ping or SSH Only");
+                _logger.info("PollingPingSSH pingResult is empty or null");
             }
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("PollingPingSSH run method having error. ", exception);
         }
-
     }
 
-    public List ping(String ip)
+    public List<Object> ping(String ip)
     {
 
-        String packetdata = "";
+        StringBuilder packetdata = new StringBuilder();
 
         String result = "";
 
@@ -224,7 +290,6 @@ public class PollingPingSSH implements Runnable
 
             if(!pinglist.isEmpty())
             {
-
                 processBuilder = new ProcessBuilder(pinglist);
 
                 process = processBuilder.start();
@@ -233,15 +298,14 @@ public class PollingPingSSH implements Runnable
 
                 while ((result = reader.readLine()) != null)
                 {
-                    packetdata+=result;
-                    
+                    packetdata.append(result);
                 }
 
-                if (!packetdata.isEmpty())
+                if (packetdata.length() > 0)
                 {
+                    //add received count number here &&
                     if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) >=1))
                     {
-
                         packetSend = Integer.parseInt(packetdata.substring((packetdata.indexOf(" packets transmitted")  - 1), packetdata.indexOf(" packets transmitted")));
 
                         packetReceive = Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,")));
@@ -257,16 +321,16 @@ public class PollingPingSSH implements Runnable
                         pingResultList.add(packetLoss);
 
                         pingResultList.add(rtt);
-
                     }
 
+                    // same add here condition
                     else if((Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) == 0))
                     {
                         packetSend = Integer.parseInt(packetdata.substring((packetdata.indexOf(" packets transmitted")  - 1), packetdata.indexOf(" packets transmitted")));
 
                         packetReceive = Integer.parseInt(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,")));
 
-                        packetLoss = 100;
+                        packetLoss = CommonConstant.PACKETLOSS;
 
                         rtt = -1;
 
@@ -277,26 +341,22 @@ public class PollingPingSSH implements Runnable
                         pingResultList.add(packetLoss);
 
                         pingResultList.add(rtt);
-
                     }
                     else
                     {
-                        System.out.println("Host Unreachable");
+                        _logger.info("Getting Stuff in Ping at Polling Time");
                     }
-
                 }
-
             }
-
             else
             {
-                System.out.println("Something went Wrong.");
+                _logger.info("Something went Wrong in Ping at Polling Time");
             }
         }
 
-        catch(Exception e)
+        catch(Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("PollingPingSSH ping method having error. ", exception);
         }
 
         finally
@@ -308,9 +368,9 @@ public class PollingPingSSH implements Runnable
                     reader.close();
                 }
             }
-            catch (IOException e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("PollingPingSSH in ping method reader close having error. ", exception);
             }
 
             try
@@ -320,12 +380,10 @@ public class PollingPingSSH implements Runnable
                     process.destroy();
                 }
             }
-
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("PollingPingSSH in ping method process close having error. ", exception);
             }
-
         }
 
         return pingResultList;
@@ -339,13 +397,13 @@ public class PollingPingSSH implements Runnable
 
         JSch jSch = new JSch();
 
-        com.jcraft.jsch.Session session = null;
+        Session session = null;
 
         Channel channel= null;
 
         String resultTemp = "";
 
-        String resultString = null;
+        StringBuilder resultString = null;
 
         BufferedWriter bufferedWriter = null;
 
@@ -353,17 +411,17 @@ public class PollingPingSSH implements Runnable
         
         try
         {
-            session = jSch.getSession(username, ip, 22);
+            session = jSch.getSession(username, ip, CommonConstant.SSHPORT);
 
             session.setPassword(decryptedPassword);
 
             session.setConfig("StrictHostKeyChecking", "no");
 
-            session.connect();
+            session.connect(10*1000);
             
             channel = (ChannelShell) session.openChannel("shell");
 
-            channel.connect();
+            channel.connect(10*1000);
             
             bufferedWriter = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
 
@@ -380,30 +438,25 @@ public class PollingPingSSH implements Runnable
 
             while ((resultTemp = bufferedReader.readLine()) != null)
             {
-                resultString+=resultTemp;
-                //sshResultList.add(resultTemp);
+                resultString.append(resultTemp);
             }
-
         }
-
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("PollingPingSSH ssh method having error. ", exception);
         }
-
         finally
         {
             try
             {
-
                 if (channel!= null)
                 {
                     channel.disconnect();
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("PollingPingSSH in ssh method channel close having error. ", exception);
             }
 
             try
@@ -413,9 +466,9 @@ public class PollingPingSSH implements Runnable
                     session.disconnect();
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("PollingPingSSH in ssh method session close having error. ", exception);
             }
 
             try
@@ -425,9 +478,9 @@ public class PollingPingSSH implements Runnable
                     bufferedWriter.close();
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("PollingPingSSH in ssh method bufferWriter close having error. ", exception);
             }
 
             try
@@ -437,14 +490,13 @@ public class PollingPingSSH implements Runnable
                     bufferedReader.close();
                 }
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                e.printStackTrace();
+                _logger.error("PollingPingSSH in ssh method bufferReader close having error. ", exception);
             }
 
         }
 
-        return resultString;
+        return resultString.toString();
     }
-
 }

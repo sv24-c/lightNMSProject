@@ -3,6 +3,7 @@ package action;
 import bean.DiscoveryBean;
 import com.opensymphony.xwork2.ModelDriven;
 import executor.DiscoveryExecutor;
+import helper.Logger;
 
 /**
  * Created by smit on 12/3/22.
@@ -12,14 +13,16 @@ public class DiscoveryAction implements ModelDriven
 
     DiscoveryBean discoveryBean = new DiscoveryBean();
 
-    public String discoveryActionGetData()
+    private static final Logger _logger = new Logger();
+
+    public String discoveryFetchData()
     {
 
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryExecutorGetData(discoveryBean))
+            if(discoveryExecutor.discoveryFetchData(discoveryBean))
             {
                 return "success";
             }
@@ -30,22 +33,22 @@ public class DiscoveryAction implements ModelDriven
 
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("DiscoveryActionFetchData discoveryActionFetchData method having error. ", exception);
         }
 
         return "failure";
     }
 
-    public String discoveryActionGetUsername()
+    public String discoveryFetchUsername()
     {
 
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryExecutorGetUsernameData(discoveryBean))
+            if(discoveryExecutor.discoveryFetchUsername(discoveryBean))
             {
                 return "success";
             }
@@ -56,21 +59,22 @@ public class DiscoveryAction implements ModelDriven
 
         }
 
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("DiscoveryActionFetchUsernameData discoveryActionFetchUsernameData method having error. ", exception);
+
         }
 
         return "failure";
     }
 
-    public String discoveryActionInsert()
+    public String discoveryInsert()
     {
         try
         {
             DiscoveryExecutor discoveryExecutor = new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryExecutorInsertInDatabase(discoveryBean))
+            if(discoveryExecutor.discoveryInsert(discoveryBean))
             {
 
                 return "success";
@@ -81,21 +85,22 @@ public class DiscoveryAction implements ModelDriven
                 return "failure";
             }
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("DiscoveryActionInsert discoveryActionInsertInDatabase method having error. ", exception);
+
         }
 
         return "failure";
     }
 
-    public String discoveryActionUpdate()
+    public String discoveryUpdate()
     {
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryExecutorUpdate(discoveryBean))
+            if(discoveryExecutor.discoveryUpdate(discoveryBean))
             {
                 return "success";
             }
@@ -104,21 +109,21 @@ public class DiscoveryAction implements ModelDriven
                 return "failure";
             }
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("DiscoveryAction discoveryUpdate method having error. ", exception);
         }
 
         return "failure";
     }
 
-    public String discoveryActionDelete()
+    public String discoveryDelete()
     {
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();
 
-            if(discoveryExecutor.discoveryExecutorDelete(discoveryBean))
+            if(discoveryExecutor.discoveryDelete(discoveryBean))
             {
                 return "success";
             }
@@ -127,9 +132,10 @@ public class DiscoveryAction implements ModelDriven
                 return "failure";
             }
         }
-        catch (Exception e)
+        catch (Exception exception)
         {
-            e.printStackTrace();
+            _logger.error("DiscoveryAction discoveryDelete method having error. ", exception);
+
         }
 
         return "failure";

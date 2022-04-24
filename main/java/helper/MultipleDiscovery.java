@@ -1,11 +1,11 @@
 package helper;
 
-import bean.MonitorBean;
+import dao.Database;
 import dao.DiscoveryDao;
 import dao.MonitorDao;
 
-import javax.management.monitor.Monitor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -14,16 +14,51 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MultipleDiscovery
 {
+    private static MonitorDao monitorDao = new MonitorDao();
 
-    MonitorDao monitorDao = new MonitorDao();
+    private static LinkedBlockingQueue<Integer> linkedBlockingQueue = new LinkedBlockingQueue<>();
 
-    public boolean multipleDiscovery(MonitorBean monitorBean)
+    private static Database database = new Database();
+
+    private static ArrayList<Object> data = null;
+
+    private static final Logger _logger = new Logger();
+
+   public static boolean multipleDiscoveryAddInQueue(int id)
+   {
+       try
+       {
+           linkedBlockingQueue.add(id);
+
+           return true;
+       }
+       catch (Exception exception)
+       {
+           _logger.error("MultipleDiscovery multipleDiscoveryAddInQueue method having error. ", exception);
+
+       }
+       return false;
+   }
+
+   public static int multipleDiscoveryTakeFromQueue()
+   {
+       int takeId = 0;
+
+       try
+       {
+          takeId =  linkedBlockingQueue.take();
+       }
+       catch (InterruptedException exception)
+       {
+           _logger.error("MultipleDiscovery multipleDiscoveryTakeFromQueue method having error. ", exception);
+       }
+       return takeId;
+   }
+
+    public static String multipleDiscoveryPingSSH(int blockingQueueTakenId)
     {
-
         try
         {
-            LinkedBlockingQueue<MonitorBean> linkedBlockingQueue = new LinkedBlockingQueue<>();
-
             MonitorHelper monitorHelper = new MonitorHelper();
 
             String name = null;
@@ -36,108 +71,139 @@ public class MultipleDiscovery
 
             String password = null;
 
+            String availability = "unknown";
+
             boolean pingresult;
 
             List<String> pingcommands = new ArrayList<>();
 
-            List<String> usernamePasswordList;
+            List<HashMap<String, Object>> usernamePasswordList;
 
-            List<String> provisionDataList;
+            List<HashMap<String, Object>> provisionDataList;
 
-            provisionDataList = monitorDao.monitorDaoGetDataForProvision(monitorBean.getId());
+            data = new ArrayList<>();
+
+            data.add(blockingQueueTakenId);
+
+            provisionDataList = database.fireSelectQuery("SELECT Name, IP, Type FROM Discovery where Id = ?", data);
 
             if(!provisionDataList.isEmpty())
             {
+                name = (String) provisionDataList.get(0).get("Name");
 
-                name = provisionDataList.get(0);
+                ip = (String) provisionDataList.get(0).get("IP");
 
-                ip = provisionDataList.get(1);
-
-                type = provisionDataList.get(2);
+                type = (String) provisionDataList.get(0).get("Type");
             }
 
-            if(monitorDao.monitorDaoGetData(monitorBean.getId()))
+            if (blockingQueueTakenId != 0 )
             {
-                monitorBean.setStatus(ip+" already added to Monitor Grid");
+                data = new ArrayList<>();
 
-                return true;
-            }
+                data.add(ip);
 
-            else
-            {
+                data.add(type);
 
-
-                pingcommands.add("ping");
-                pingcommands.add("-c");
-                pingcommands.add("5");
-                pingcommands.add(ip);
-
-                pingresult = monitorHelper.ping(pingcommands);
-
-                if (pingresult)
+                if(!database.fireSelectQuery("SELECT Id FROM Monitor WHERE IP = ? AND Type = ?", data).isEmpty())
                 {
-
-                    if (type.equals("Ping"))
-                    {
-
-                        monitorBean.setStatus(ip+" Provision Done.");
-
-                        monitorDao.monitorDaoInsert(monitorBean.getId(), name, ip, type);
-
-                        return true;
-
-                    }
-
-                    else if (type.equals("SSH"))
-                    {
-
-                        DiscoveryDao discoveryDao = new DiscoveryDao();
-
-                        usernamePasswordList = discoveryDao.discoveryDaoGetUsernamePasswordData(monitorBean.getId());
-
-                        if (!usernamePasswordList.isEmpty())
-                        {
-                            username = usernamePasswordList.get(1);
-
-                            password = usernamePasswordList.get(2);
-                        }
-
-                        if (monitorHelper.ssh(username, password, ip))
-                        {
-
-                            monitorBean.setStatus(ip+" Provision Done.");
-
-                            monitorDao.monitorDaoInsert(monitorBean.getId(), name, ip, type);
-
-                            return true;
-                        }
-                        else
-                        {
-                            monitorBean.setStatus("SSH Failed to this " + ip);
-
-                            return false;
-                        }
-
-                    }
-                    else
-                    {
-                        monitorBean.setStatus("Device Type Would be Ping or SSH only");
-
-                        return false;
-                    }
-
+                    return ip+" already in the Monitor Grid";
                 }
                 else
                 {
-                    monitorBean.setStatus("Provision Failed "+ip);
+                    pingcommands.add("ping");
+
+                    pingcommands.add("-c");
+
+                    pingcommands.add("5");
+
+                    pingcommands.add(ip);
+
+                    pingresult = monitorHelper.ping(pingcommands);
+
+                    if (pingresult)
+                    {
+                        if (type != null)
+                        {
+                            switch (type)
+                            {
+                                case "Ping":
+
+                                    data = new ArrayList<>();
+
+                                    data.add(blockingQueueTakenId);
+
+                                    data.add(name);
+
+                                    data.add(ip);
+
+                                    data.add(type);
+
+                                    data.add(availability);
+
+                                    //monitorDao.monitorInsert(blockingQueueTakenId, name, ip, type);
+
+                                    database.fireExecuteUpdate("INSERT INTO Monitor (Id, Name, IP, Type, Availability) VALUES(?,?,?,?,?)" , data);
+
+                                    return "Ping "+ ip + " Provision Done.";
+
+                                case "SSH":
+
+                                    DiscoveryDao discoveryDao = new DiscoveryDao();
+
+                                    data = new ArrayList<>();
+
+                                    data.add(blockingQueueTakenId);
+
+                                    usernamePasswordList = database.fireSelectQuery("SELECT Username, Password FROM Credential WHERE Id=?" , data);
+
+                                    if (!usernamePasswordList.isEmpty())
+                                    {
+                                        username = (String) usernamePasswordList.get(0).get("Username");
+
+                                        password = (String) usernamePasswordList.get(0).get("Password");
+                                    }
+
+                                    if (monitorHelper.ssh(username, password, ip))
+                                    {
+                                        data = new ArrayList<>();
+
+                                        data.add(blockingQueueTakenId);
+
+                                        data.add(name);
+
+                                        data.add(ip);
+
+                                        data.add(type);
+
+                                        data.add(availability);
+
+                                        database.fireExecuteUpdate("INSERT INTO Monitor (Id, Name, IP, Type, Availability) VALUES(?,?,?,?,?)" , data);
+
+                                        return "SSH "+ ip + " Provision Done.";
+                                    }
+                                    else
+                                    {
+                                        return "SSH Failed to this " + ip;
+                                    }
+
+                                default:
+
+                                    return "Device Type Would be Ping or SSH only";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        return "Provision Failed "+ip;
+                    }
                 }
             }
+        }
+        catch (Exception exception)
+        {
+            _logger.error("MultipleDiscovery multipleDiscoveryPingSSH method having error. ", exception);
 
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-        return false;
+        return null;
     }
 }
