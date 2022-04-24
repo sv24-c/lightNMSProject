@@ -1,8 +1,7 @@
 /**
  * Created by smit on 3/4/22.
  */
-
-var ip = null;
+var deviceType;
 
 var discoverymain = {
 
@@ -19,6 +18,8 @@ var discoverymain = {
                 callback: discoverycallback.onload,
             };
 
+            createWebsocket.getWebsocket();
+
             mainHelper.ajaxpost(request);
         });
 
@@ -27,9 +28,7 @@ var discoverymain = {
     add: function ()
     {
 
-        $("#dis-add-btn").on("click", function () {
-
-            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <div class="container" > <div class="col-lg-5"> <div class="row"> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>Name</label><br /> <input type="text" name="Name" id="name" class="form-control input-sm" placeholder="Name" required /> </div> </div> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>IP</label><br /> <input type="text" name="IP" id="ip" class="form-control input-sm" placeholder="IP" required /> </div> </div> </div> <div class="form-group"> <label for="type">Select Device Type:</label> <select name="Type" id="type" required> <option value="ping">Ping</option> <option value="ssh">SSH</option> </select>  </div> <div id="adc" style="display: none;"> <label for="type">UserName</label><br /> <input type="text" class="form-control input-sm" id="usernamessh" name="usernamessh" placeholder="UserName" required /><br /> <label for="type">Password</label><br /> <input type="password" class="form-control input-sm" id="passwordssh" name="passwordssh"placeholder="Password" required /><br /><br /> </div> <button type="button" class="btn btn-success btn-block" id="add-btn">Add</button> </div></div><div class="text-center" id="resp" style="margin-top: 14px;" ></div></div></div></div>');
+            $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <div id="nameRequired" style="display: none;"> Name field is Required! <br><br></div> <div class="container" > <div class="col-lg-5"> <div class="row"> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>Name</label><br /> <input type="text" name="name" id="name" class="form-control input-sm" placeholder="Name" required />  </div> </div>    <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>IP</label><br /> <input type="text" name="IP" id="ip" class="form-control input-sm" placeholder="IP" required /> </div> </div> </div> <div class="form-group"> <label for="type">Select Device Type:</label> <select name="type" id="type" required> <option value="ping">Ping</option> <option value="ssh">SSH</option> </select>  </div> <div id="adc" style="display: none;"> <label for="type">UserName</label><br /> <input type="text" class="form-control input-sm" id="usernamessh" name="usernamessh" placeholder="UserName" required /><br /> <label for="type">Password</label><br /> <input type="password" class="form-control input-sm" id="passwordssh" name="passwordssh"placeholder="Password" required /><br /><br /> </div> <button type="button" class="btn btn-success btn-block" id="add-btn">Add</button> <button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="discoverymain.back()"> Back </button></div></div><div class="text-center" id="resp" style="margin-top: 14px;" ></div></div></div></div>');
 
             $("#type").on('change', function ()
             {
@@ -53,37 +52,72 @@ var discoverymain = {
 
             let password = $("#passwordssh").val();
 
-            let sdata = {
-                Name: name,
-                IP: ip,
-                Type: type,
-                Username: username,
-                Password: password,
-            };
+            if (name && ip && type)
+            {
+                if(type==="Ping")
+                {
+                    let sendData = {
+                        name: name,
+                        IP: ip,
+                        type: type,
+                        username: username,
+                        password: password,
+                    };
 
-            let request = {
+                    let request = {
 
-                url: "discoveryInsertProcess",
+                        url: "discoveryInsertProcess",
 
-                data: sdata,
+                        data: sendData,
 
-                callback: discoverycallback.add,
-            };
+                        callback: discoverycallback.add,
+                    };
 
-            mainHelper.ajaxpost(request);
+                    mainHelper.ajaxpost(request);
+                }
+                else
+                {
+                    if(username && password)
+                    {
+                        let sendData = {
+                            name: name,
+                            IP: ip,
+                            type: type,
+                            username: username,
+                            password: password,
+                        };
 
-        });
+                        let request = {
+
+                            url: "discoveryInsertProcess",
+
+                            data: sendData,
+
+                            callback: discoverycallback.add,
+                        };
+
+                        mainHelper.ajaxpost(request);
+                    }
+                    else
+                    {
+                        toastr.warning("Field Required to Fill");
+                    }
+                }
+            }
+            else
+            {
+                toastr.warning("Field Required to Fill");
+            }
 
         });
     },
 
     provision: function (that)
     {
-        toastr.info("Provision Starting");
 
         let id = $(that).data("id");
 
-        let sdata = {
+        let sendData = {
             id: id
         };
 
@@ -91,20 +125,19 @@ var discoverymain = {
 
             url: "monitorProcess",
 
-            data: sdata,
+            data: sendData,
 
             callback: discoverycallback.provision,
         };
         mainHelper.ajaxpost(request);
 
-        //toastr.info(data.status);
-    },
+        },
 
     edit: function (that)
     {
-        var id = $(that).data("id");
+        let id = $(that).data("id");
 
-        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <div class="container" > <div class="col-lg-5"> <div class="row"> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>Name</label><br /> <input type="text" name="Name" id="name" class="form-control input-sm" placeholder="Name" required /> </div> </div> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>IP</label><br /> <input type="text" name="IP" id="ip" class="form-control input-sm" placeholder="IP" required /> </div> </div> </div> <div class="form-group"> <label for="type">Select Device Type:</label> <select name="Type" id="type" disabled="disabled" required> <option id="ping" value="ping">Ping</option> <option id="ssh" value="ssh">SSH</option> </select>  </div> <div id="adc" style="display: none;"> <label for="type">UserName</label><br /> <input type="text" class="form-control input-sm" id="usernamessh" name="usernamessh" placeholder="UserName" required /><br /> <label for="type">Password</label><br /> <input type="password" class="form-control input-sm" id="passwordssh" name="passwordssh"placeholder="Password" required /><br /><br /> </div> <button type="button" class="btn btn-success btn-block" id="update-btn"  data-id="'+that.dataset.id+'" onclick="discoverymain.update(this)">Update</button> </div></div><div class="text-center" id="resp" style="margin-top: 14px;" ></div></div></div></div>');
+        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <div class="container" > <div class="col-lg-5"> <div class="row"> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>Name</label><br /> <input type="text" name="name" id="name" class="form-control input-sm" placeholder="Name" required /> </div> </div> <div class="col-xs-6 col-sm-6 col-md-6"> <div class="form-group"> <label>IP</label><br /> <input type="text" name="IP" id="ip" class="form-control input-sm" placeholder="IP" required /> </div> </div> </div> <div class="form-group"> <label for="type">Select Device Type:</label> <select name="type" id="type" disabled="disabled" required> <option id="ping" value="ping">Ping</option> <option id="ssh" value="ssh">SSH</option> </select>  </div> <div id="adc" style="display: none;"> <label for="type">UserName</label><br /> <input type="text" class="form-control input-sm" id="usernamessh" name="usernamessh" placeholder="UserName" required /><br /> <label for="type">Password</label><br /> <input type="password" class="form-control input-sm" id="passwordssh" name="passwordssh"placeholder="Password" required /><br /><br /> </div> <button type="button" class="btn btn-success btn-block" id="update-btn"  data-id="'+that.dataset.id+'" onclick="discoverymain.update(this)">Update</button> <button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="discoverymain.back()"> Back </button> </div></div><div class="text-center" id="resp" style="margin-top: 14px;" ></div></div></div></div>');
 
         $("#name").val($(that).parent().prev().prev().prev().text());
 
@@ -112,21 +145,20 @@ var discoverymain = {
 
         if($(that).parent().prev().text()==="SSH")
         {
+            deviceType = "SSH";
 
             $("#ssh").attr("selected","selected");
             $("#ping").removeAttr("selected");
             $("#adc").show();
 
-            //$("#usernamessh").val(data.username);
-
-            let sdata = {
+            let sendData = {
                 id: id,
             };
             let request = {
 
                 url: "discoveryGetUsernameProcess",
 
-                data: sdata,
+                data: sendData,
 
                 callback: discoverycallback.getUsername,
             };
@@ -136,6 +168,8 @@ var discoverymain = {
 
         else
         {
+            deviceType = "Ping";
+
             $("#ssh").removeAttr("selected");
             $("#ping").attr("selected","selected");
             $("#adc").hide();
@@ -145,37 +179,77 @@ var discoverymain = {
 
     update: function (that)
     {
-            var name = $("#name").val();
-            var ip = $("#ip").val();
-            var uname = $("#usernamessh").val();
-            var pass = $("#passwordssh").val();
-            var id = $(that).data("id");
+            let name = $("#name").val();
+            let ip = $("#ip").val();
+            let uname = $("#usernamessh").val();
+            let pass = $("#passwordssh").val();
 
-            let sdata = {
-            id: id,
-            Name: name,
-            IP: ip,
-            Username: uname,
-            Password: pass,
-            };
+            if(deviceType==="SSH")
+            {
+                if (name && ip && uname && pass)
+                {
+                    let id = $(that).data("id");
 
-           let request = {
+                    let sendData = {
+                        id: id,
+                        name: name,
+                        IP: ip,
+                        username: uname,
+                        password: pass,
+                    };
 
-                url: "discoveryUpdateProcess",
+                    let request = {
 
-                data: sdata,
+                        url: "discoveryUpdateProcess",
 
-                callback: discoverycallback.update,
-            };
-            mainHelper.ajaxpost(request);
+                        data: sendData,
+
+                        callback: discoverycallback.update,
+                    };
+                    mainHelper.ajaxpost(request);
+                }
+                else
+                {
+                    toastr.warning("Field Required to Fill");
+                }
+            }
+            else
+            {
+                if (name && ip && type)
+                {
+                    let id = $(that).data("id");
+
+                    let sendData = {
+                        id: id,
+                        name: name
+                        ,
+                        IP: ip,
+                        username: uname,
+                        password: pass,
+                    };
+
+                    let request = {
+
+                        url: "discoveryUpdateProcess",
+
+                        data: sendData,
+
+                        callback: discoverycallback.update,
+                    };
+                    mainHelper.ajaxpost(request);
+                }
+                else
+                {
+                    toastr.warning("Field Required to Fill");
+                }
+            }
 },
 
     delete: function (that)
     {
+        let id = $(that).data("id");
 
-        var id = $(that).data("id");
-
-        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"><div class="card-body">Are You Sure, To Delete this Row? <button type="button" class="btn btn-success btn-block" id="delete-btn" data-id="'+that.dataset.id+'" onclick="discoverymain.deletediscovery(this)">Delete</button> </div></div></div>');
+        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"><div class="card-body">Are You Sure, To Delete this Row? <button type="button" class="btn btn-success btn-block" id="delete-btn" data-id="'+that.dataset.id+'" onclick="discoverymain.deletediscovery(this)">Delete</button> <button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="discoverymain.back()"> Back </button> </div></div></div>');
 
         toastr.warning('Data Would be Permanently deleted');
     },
@@ -183,9 +257,9 @@ var discoverymain = {
     deletediscovery: function (that)
     {
 
-        var id = $(that).data("id");
+        let id = $(that).data("id");
 
-        let sdata = {
+        let sendData = {
             id: id,
         };
 
@@ -193,14 +267,38 @@ var discoverymain = {
 
             url: "discoveryDeleteProcess",
 
-            data: sdata,
+            data: sendData,
 
-            callback: discoverycallback.deletefinal,
+            callback: discoverycallback.confirmdelete,
         };
         mainHelper.ajaxpost(request);
 
-    }
+    },
 
+    back: function ()
+    {
+        let request = {
+
+            url: "discoveryProcess",
+
+            data: "",
+
+            callback: discoverycallback.onload,
+        };
+
+        mainHelper.ajaxpost(request);
+
+    },
+
+};
+
+var discoveryhelper = {
+
+    adddata: function (data , table) {
+        $.each(data.discoveryBeanList, function () {
+            table.row.add([this.name, this.IP, this.type, "<button onclick='discoverymain.provision(this);' data-id='"+this.id+"' class='btn btn-sm btn-info'>Provision</button><button onclick='discoverymain.delete(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button><button onclick='discoverymain.edit(this);' data-id='"+this.id+"'  data-type='" + this.type + "' class='btn btn-sm btn-secondary' id='dis-edit-btn'>Edit</button>"]).draw();
+        });
+    },
 
 };
 
@@ -208,24 +306,12 @@ var discoverycallback = {
 
     onload: function (data)
     {
-        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery Grid</h4>   <button type="submit" class="btn btn-primary me-2" id="dis-add-btn" onclick="discoverymain.add()">Add</button>     <div class="table-responsive pt-3"> <table class="table table-bordered"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> </tr> </thead> <tbody id="tablebody"> <tr> </tr> </tbody> </table> </div> </div> </div> </div>');
 
-        let tblData = "";
+        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Discovery Grid</h4>   <button type="button" class="btn btn-primary me-2" id="dis-add-btn" onclick="discoverymain.add()">Add Device</button>     <div class="table-responsive pt-3"> <table class="table table-bordered" id="discoveryTable"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Operation </th> </tr> </thead> </table> </div> </div> </div> </div>');
 
-        $.each(data.discoveryBeanList, function() {
+        table = $('#discoveryTable').DataTable({lengthMenu: [5, 10, 20, 50, 100, 200, 500]});
 
-            tblData += "<tr><td>" + this.name + "</td>" +
-                "<td>" + this.IP + "</td>" +
-                "<td>" + this.type + "</td>" +
-                "<td>"+
-                "<button onclick='discoverymain.provision(this);' data-id='"+this.id+"' class='btn btn-sm btn-info' >Provision</button>"+
-                "<button onclick='discoverymain.delete(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"+
-                "<button onclick='discoverymain.edit(this);' data-id='"+this.id+"' ' data-type='" + this.type + "' class='btn btn-sm btn-secondary' id='dis-edit-btn'>Edit</button>"+
-                "</td></tr>";
-        });
-
-        $("#tablebody").html(tblData);
-
+        discoveryhelper.adddata(data, table);
     },
 
      add: function (data)
@@ -239,24 +325,16 @@ var discoverycallback = {
             $("#usernamessh").val(null);
 
             $("#passwordssh").val(null);
-         toastr.success('Data Added to Discovery Grid');
-         toastr.info(data.status+" already in Discovery");
 
-         window.history.go(0);
+         toastr.info(data.status);
 
-
+         discoverymain.back();
 
      },
 
     provision: function (data)
     {
-        //toastr.success('Discovery Provision Done');
-
-        toastr.info(data.status);
-
-        discoverycallback.onload();
-
-        //window.location.reload();
+        toastr.success(data.status);
 
     },
 
@@ -264,14 +342,16 @@ var discoverycallback = {
     {
         toastr.success('Data Updated Successfully');
 
-        window.location.reload();
+        discoverymain.back();
+
     },
 
-    deletefinal: function ()
+    confirmdelete: function ()
     {
         toastr.info('Data Deleted Successfully');
 
-        window.location.reload();
+        discoverymain.back();
+
     },
 
     getUsername: function (data) {

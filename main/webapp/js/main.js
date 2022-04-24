@@ -28,7 +28,6 @@ var mainHelper={
 
                     callbacks.remove(request.callback);
 
-
                 }
             },
             error: function ()
