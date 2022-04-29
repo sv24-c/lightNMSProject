@@ -1,6 +1,10 @@
 /**
  * Created by smit on 10/3/22.
  */
+
+let username = null;
+let password = null;
+
 var login = {
 
     onload : function () {
@@ -34,80 +38,31 @@ var login = {
 
     onLogin : function () {
 
-        let username = $("#userName").val();
+        username = $("#userName").val();
 
-        let password = $("#password").val();
+        password = $("#password").val();
 
-        let sendData = {
-
-            userName: username,
-
-            password: password,
-        };
+        let param = $('#loginForm').serializeArray().reduce(function(finalParam, currentValue) {
+            finalParam[currentValue.name] = currentValue.value;
+            return finalParam;
+        }, {});
 
         let request = {
 
             url: "loginProcess",
 
-            async: false,
-
-            data: sendData,
+            data: param,
 
             callback: logincallback.onLogincallback,
         };
 
         mainHelper.ajaxpost(request);
     },
-
-    onvalidation : function () {
-
-        let requesturl = $(location).attr('href');
-
-        let splitUrl = requesturl.split("/");
-
-        let lastUrlName = splitUrl[splitUrl.length - 1];
-
-        if (lastUrlName !== "logoutProcess" || lastUrlName !== null)
-        {
-            $("#validationText").show();
-
-            if(lastUrlName === "login.jsp")
-            {
-                $("#validationText").hide();
-            }
-
-            if(lastUrlName === "logoutProcess")
-            {
-                $("#validationText").hide();
-            }
-        }
-    },
-
-   /* onlogout : function () {
-
-       $("#logout").on("click", function () {
-
-           let request = {
-
-               url : "logoutProcess",
-
-               data: " ",
-
-               callback: logincallback.onlogout()
-           };
-
-           mainHelper.ajaxpost(request);
-       });
-
-    }*/
-
 };
 
 var logincallback = {
 
     onLogincallback : function (data) {
-
-        /*toastr.error(data.status);*/
 
         if (data.status === "Success")
         {
@@ -115,12 +70,10 @@ var logincallback = {
         }
         else
         {
-            toastr.error("Wrong Username or Password");
+            if (data.userName !== "" && data.password !== "")
+            {
+                toastr.error("Wrong Username or Password");
+            }
         }
     }
-
-   /* onlogout : function () {
-
-        toastr.success("LogOut Successfully");
-    }*/
 };

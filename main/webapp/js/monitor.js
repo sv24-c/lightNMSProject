@@ -1,6 +1,7 @@
 /**
  * Created by smit on 4/4/22.
  */
+
 var monitormain = {
 
     onload: function ()
@@ -15,7 +16,7 @@ var monitormain = {
 
                 data: "",
 
-                callback: monitorcallback.onload,
+                callback: monitormain.callbackOnload,
             };
 
             mainHelper.ajaxpost(request);
@@ -23,43 +24,41 @@ var monitormain = {
         });
     },
 
-    getChartsData: function (that)
+    getChartsData: function (context)
     {
+        let type = $(context).data("value");
 
-        let type = $(that).data("value");
+        let id = $(context).data("id");
 
-        let id = $(that).data("id");
-
-        let ip = $(that).parent().prev().prev().prev().text();
+        let ip = $(context).parent().prev().prev().prev().text();//todo change ip
 
         if (type === "SSH")
         {
             toastr.info('Data Loading...');
 
-            monitorHelper.showsshdata(id, type, ip);
-
+            monitormain.fetchSSHData(id, type, ip);
         }
         else
         {
             toastr.info('Data Loading...');
 
-            monitorHelper.showpingdata(id, type, ip);
+            monitormain.fetchPingData(id, type, ip);
         }
 
     },
 
-    delete: function (that) {
+    delete: function (context) {
 
-        let id = $(that).data("id");
+        let id = $(context).data("id");
 
         $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"><div class="card-body">Are You Sure, To Delete this Row? <button type="button" class="btn btn-success btn-block" id="delete-monitor-btn" data-id="'+that.dataset.id+'" onclick="monitormain.confirmdelete(this)">Delete</button>  <button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="monitormain.back()"> Back </button> </div></div></div>');
 
         toastr.warning('Data Would be Permanently deleted');
     },
 
-    confirmdelete: function (that)
+    confirmdelete: function (context)
     {
-        let id = $(that).data("id");
+        let id = $(context).data("id");
 
         let sendData = {
             id: id
@@ -71,7 +70,7 @@ var monitormain = {
 
             data: sendData,
 
-            callback: monitorcallback.confirmdelete,
+            callback: monitormain.callbackConfirmDelete(),
         };
         mainHelper.ajaxpost(request);
 
@@ -85,20 +84,36 @@ var monitormain = {
 
             data: "",
 
-            callback: monitorcallback.onload,
+            callback: monitormain.callbackOnload,
         };
 
         mainHelper.ajaxpost(request);
-
     },
-};
 
-var monitorHelper = {
+    callbackOnload: function (data)
+    {
+        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Monitor Grid</h4> <div class="table-responsive pt-3"> <table class="table table-bordered" id="monitorTable"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Availability </th> <th> Operation </th></tr> </thead> </table> </div> </div> </div> </div>');
 
-    showsshdata: function (id, type, ip)
+        table = $('#monitorTable').DataTable({lengthMenu: [5, 10, 20, 50, 100, 200, 500]});
+
+        $.each(data.monitorBeanList, function () {
+            table.row.add([this.name, this.ip, this.type, this.availability,"<button onclick='monitormain.getChartsData(this);' data-id='"+this.id+"' data-value='"+this.type+"' class='btn btn-sm btn-info' >Show</button><button onclick='monitormain.delete(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"]).draw();
+        }); // todo table column and data.
+
+        //monitorHelper.loaddata(data, table);
+    },
+
+    callbackConfirmDelete: function ()
+    {
+        toastr.info('Data Deleted Successfully');
+
+        window.location.reload();
+    },
+
+    fetchSSHData: function (id, type, ip)
     {
 
-        $("#overview").html('<button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="monitormain.back()"> Back </button> <br> <div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>' + ip + '</b> &nbsp;&nbsp;&nbsp;Type: <b>' + type + '</b> </div></div></div></div><br><br>   <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"> </div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"> <div id="columnChartContainer" style="height: 300px; width: 100%;"></div> </div></div>  <br><br><br>   <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="cpu" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px; padding: 10px">CPU(%)<hr><p style="font-size: 25px"></p></div>    <div id="disk" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Disk(%)<hr><p style="font-size: 25px"></p> </div><div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Memory(MB)<hr><p style="font-size: 25px"></p></div>  <div id="swapMemory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Swap Memory(MB)<hr><p style="font-size: 25px"></p></div>  </div>  </div></div>  ');
+        $("#overview").html('<button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="monitormain.back()"> Back </button> <br> <div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>' + ip + '</b> &nbsp;&nbsp;&nbsp;Type: <b>' + type + '</b> </div></div></div></div><br><br>   <div class="row"><div id="chartContainer" style="height: 300px; width: 100%;"> </div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"> <div id="columnChartContainer" style="height: 300px; width: 100%;"></div> </div></div>  <br><br><br>   <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="cpu" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px; padding: 10px">CPU(%)<hr><p style="font-size: 25px"></p></div>    <div id="disk" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Disk(%)<hr><p style="font-size: 25px"></p> </div><div id="memory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Memory(%)<hr><p style="font-size: 25px"></p></div>  <div id="swapMemory" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Swap Memory(%)<hr><p style="font-size: 25px"></p></div>  </div>  </div></div>  ');
 
         let sendData = {
             id: id, Type: type, IP:ip
@@ -110,14 +125,13 @@ var monitorHelper = {
 
             data: sendData,
 
-            callback: monitorcallback.showsshdata,
+            callback: monitormain.callbackFetchSSHData,
         };
 
         mainHelper.ajaxpost(request);
-
     },
 
-    showpingdata: function (id, type, ip)
+    fetchPingData: function (id, type, ip)
     {
         $("#overview").html('<button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="monitormain.back()"> Back </button> <br><div class="col-md-6 col-lg-12 grid-margin stretch-card"> <div class="card card-rounded"> <div class="card-body"> <div>IP: <b>' + ip + '</b> &nbsp;&nbsp;&nbsp;Type: <b>' + type + '</b> </div></div></div></div> <br><br> <div class="row"><div id="pingchartContainer" style="height: 300px; width: 100%;"></div></div><br><br><br>   <div class="card card-rounded"> <div class="card-body"><div id="pingchartContainerPartTwo" style="height: 300px; width: 100%;"></div></div></div>  <br><br><br>      <div class="card card-rounded"> <div class="card-body">  <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 130px"><div id="packetLoss" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Packet Loss(%)<hr><p style="font-size: 25px"></p></div>    <div id="rtt" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">RTT(ms)<hr><p style="font-size: 25px"> </p> </div><div id="receivePacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Receive Packet<hr><p style="font-size: 25px"> </p> </div><div id="sendPacket" style="height: 130px; width: 150px; color: white; background-color: #008000; font-size: 18px;  padding: 10px">Send Packet<hr><p style="font-size: 25px"> </p></div>    </div>  </div></div>    ');
 
@@ -131,39 +145,13 @@ var monitorHelper = {
 
             data: sendData,
 
-            callback: monitorcallback.showpingdata,
+            callback: monitormain.callbackPingData,
         };
         mainHelper.ajaxpost(request);
     },
 
-    loaddata : function (data, table) {
 
-        $.each(data.monitorBeanList, function () {
-            table.row.add([this.name, this.ip, this.type, this.availability,"<button onclick='monitormain.getChartsData(this);' data-id='"+this.id+"' data-value='"+this.type+"' class='btn btn-sm btn-info' >Show</button><button onclick='monitormain.delete(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"]).draw();
-        });
-    }
-};
-
-var monitorcallback = {
-
-    onload: function (data)
-    {
-
-        $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"> <div class="card-body"> <h4 class="card-title">Monitor Grid</h4> <div class="table-responsive pt-3"> <table class="table table-bordered" id="monitorTable"> <thead> <tr> <th> Name </th> <th> IP </th> <th> Type </th> <th> Availability </th> <th> Operation </th></tr> </thead> </table> </div> </div> </div> </div>');
-
-        table = $('#monitorTable').DataTable({lengthMenu: [5, 10, 20, 50, 100, 200, 500]});
-
-        monitorHelper.loaddata(data, table);
-    },
-
-    confirmdelete: function ()
-    {
-        toastr.info('Data Deleted Successfully');
-
-        window.location.reload();
-    },
-
-    showsshdata: function (data) {
+    callbackFetchSSHData: function (data) {
 
         let sshup = 0;
 
@@ -177,17 +165,17 @@ var monitorcallback = {
 
         let list = [];
 
-        $("#cpu").find("p").text(data.sshMatrixList[0]["CPU"]);
+        $("#cpu").find("p").text(data.sshMatrixHashMap["CPU"]);
 
-        $("#disk").find("p").text(data.sshMatrixList[0]["Disk"]);
+        $("#disk").find("p").text(data.sshMatrixHashMap["Disk"]);
 
-        $("#memory").find("p").text(data.sshMatrixList[0]["Memory"]);
+        $("#memory").find("p").text(data.sshMatrixHashMap["Memory"]);
 
-        $("#swapMemory").find("p").text(data.sshMatrixList[0]["SwapMemory"]);
+        $("#swapMemory").find("p").text(data.sshMatrixHashMap["SwapMemory"]);
 
-        sshup = data.sshStatusList[0]["SUM(Status='Up')"];
+        sshup = data.sshStatusHashMap["SUM(Status='Up')"];
 
-        sshdown = data.sshStatusList[0]["SUM(Status='Down')"];
+        sshdown = data.sshStatusHashMap["SUM(Status='Down')"];
 
         var chart = new CanvasJS.Chart("chartContainer", {
             animationEnabled: true,
@@ -208,15 +196,17 @@ var monitorcallback = {
                 ]
             }]
         });
+
         chart.render();
 
         $.each(data.cpuMap, function (key, value) {
 
             timeStamp = data.cpuMap[key]["PollingTime"];
+
             cpuUsed = data.cpuMap[key]["CPU"];
 
             /*timeStamp = key;
-            cpuUsed = value;*/
+             cpuUsed = value;*/
 
             list.push({
                 label: timeStamp,
@@ -234,7 +224,8 @@ var monitorcallback = {
             },
             axisX: {
                 title: "CPU Usage per TimeStamp",
-                valueFormatString: '##.##'
+                valueFormatString: '##.##',
+                reversed:true
             },
             axisY: {
                 title: "Total CPU",
@@ -246,7 +237,7 @@ var monitorcallback = {
             data: [{
                 type: "column",
                 indexLabel: "{y}",
-                indexLabelFontColor: "#5A5757",
+                indexLabelFontColor: "#000000",
                 indexLabelFontSize: 16,
                 indexLabelPlacement: "outside",
 
@@ -259,7 +250,7 @@ var monitorcallback = {
 
     },
 
-    showpingdata: function (data) {
+    callbackPingData: function (data) {
 
         let up = 0;
 
@@ -271,17 +262,17 @@ var monitorcallback = {
 
         let rttList = [];
 
-        $("#packetLoss").find("p").text(data.matrixList[0]["PacketLoss"]);
+        $("#packetLoss").find("p").text(data.pingMatrixHashMap["PacketLoss"]);
 
-        $("#sendPacket").find("p").text(data.matrixList[0]["SendPacket"]);
+        $("#sendPacket").find("p").text(data.pingMatrixHashMap["SendPacket"]);
 
-        $("#receivePacket").find("p").text(data.matrixList[0]["ReceivePacket"]);
+        $("#receivePacket").find("p").text(data.pingMatrixHashMap["ReceivePacket"]);
 
-        $("#rtt").find("p").text(data.matrixList[0]["RTT"]);
+        $("#rtt").find("p").text(data.pingMatrixHashMap["RTT"]);
 
-        up = data.pingStatusList[0]["SUM(Status='Up')"];
+        up = data.pingStatusHashMap["SUM(Status='Up')"];
 
-        down = data.pingStatusList[0]["SUM(Status='Down')"];
+        down = data.pingStatusHashMap["SUM(Status='Down')"];
 
         var chart = new CanvasJS.Chart("pingchartContainer", {
             animationEnabled: true,
@@ -304,24 +295,32 @@ var monitorcallback = {
         });
         chart.render();
 
+        /* $.each(data.pingRTTPerPollingTimeHashMap, function (key, value)
+         {
+         rttTimeStamp = value;
+
+         rtt = key;
+
+         rttList.push({
+         label: rttTimeStamp,
+         y: rtt
+         });
+         });*/
+
         $.each(data.rttMap, function (key, value) {
 
             /*rttTimeStamp = key;
 
-            rtt = value;*/
+             rtt = value;*/
 
             rttTimeStamp = data.rttMap[key]["PollingTime"];
 
             rtt = data.rttMap[key]["RTT"];
 
             rttList.push({
-
                 label: rttTimeStamp,
-
                 y: rtt
-
             });
-
         });
 
         var rttchart = new CanvasJS.Chart("pingchartContainerPartTwo", {
@@ -334,24 +333,50 @@ var monitorcallback = {
             },
             axisX: {
                 title: "RTT per TimeStamp",
+                reversed:true
             },
             axisY: {
                 title: "Total RTT",
                 minimum: 0,
                 maximum: 10,
                 suffix: "ms",
-                includeZero: true
+                includeZero: true,
             },
             data: [{
                 type: "column", //change type to bar, line, area, pie, etc
-                //indexLabel: "{y}", //Shows y value on all Data Points
-                indexLabelFontColor: "#5A5757",
+                indexLabel: "{y}", //Shows y value on all Data Points
+                indexLabelFontColor: "#000000",
                 indexLabelFontSize: 16,
                 indexLabelPlacement: "outside",
-                dataPoints: rttList
+                dataPoints: rttList,
             }]
         });
-        rttchart.render();
 
-        }
+        rttchart.render();
+    },
+
+
+    callbackDoughnut : function (data) {
+
+        var chart = new CanvasJS.Chart("chartContainer", {
+            animationEnabled: true,
+            title:{
+                text: "Availability of Last 24 Hour",
+                horizontalAlign: "left"
+            },
+
+            data: [{
+                type: "doughnut",
+                startAngle: 60,
+                indexLabelFontSize: 17,
+                indexLabel: "{label} - #percent%",
+                toolTipContent: "<b>{label}:</b> #percent%",
+                dataPoints: [
+                    { y: sshup, label: "Up" },
+                    { y: sshdown, label: "Down" },
+                ]
+            }]
+        });
+        chart.render();
+    }
 };
