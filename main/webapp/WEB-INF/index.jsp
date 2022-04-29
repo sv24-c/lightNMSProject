@@ -25,26 +25,9 @@
 
     <script src="https://canvasjs.com/assets/script/canvasjs.min.js"> </script>
 
-   <%-- <script type="text/javascript" src="/js/jQueryFile.js"></script>
-
-
-    <script type="text/javascript" src="/js/loginPage.js"></script>
-    <script type="text/javascript" src="/js/main.js"></script>
-    <script type="text/javascript" src="/js/discovery.js"></script>
-    <script type="text/javascript" src="/js/mainDashboard.js"></script>
-    <script type="text/javascript" src="/js/monitor.js"></script>
-    <script type="text/javascript" src="/js/toastr.min.js"></script>
-    <script src="/js/websocket.js"></script>
-
-    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"> </script>--%>
-
     <script>
 
         $(document).ready(function () {
-
-            /*if ( window.history.replaceState ) {
-                window.history.replaceState( null, null, window.location.href );
-            }*/
 
             dashboardmain.onload();
 
@@ -58,17 +41,6 @@
 
 </head>
 <body>
-
-<%--<%
-
-    response.setHeader("Cache-Control","no-cache, no-store, must-revalidate"); //HTTP 1.1
-
-    response.setHeader("Pragma","no-cache"); // HTTP 1.0
-
-    response.setHeader("Expires","0"); // Proxies
-
-
-%>--%>
 
 <div class="container-scroller">
     <nav class="navbar default-layout col-lg-12 col-12 p-0 fixed-top d-flex align-items-top flex-row">
