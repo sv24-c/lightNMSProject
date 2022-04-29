@@ -21,11 +21,11 @@ public class ConnectionPool
         {
             Connection connection = null;
 
-            linkedBlockingQueue = new LinkedBlockingQueue<>();
+            linkedBlockingQueue = new LinkedBlockingQueue<>(15);
 
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            for (int i = 0; i < CommonConstant.CONNECTION ; i++)
+            for (int i = 0; i < 15 ; i++)
             {
                 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
 
@@ -39,10 +39,10 @@ public class ConnectionPool
                 }
             }
 
-            if (linkedBlockingQueue.size() != CommonConstant.CONNECTION)
+           /* if (linkedBlockingQueue.size() != CommonConstant.CONNECTION)
             {
-                _logger.info("You have left "+(CommonConstant.CONNECTION - linkedBlockingQueue.size()) + " connections to make out of" + CommonConstant.CONNECTION + " connections");
-            }
+                _logger.info("You have left "+(CommonConstant.CONNECTION - linkedBlockingQueue.size()) + " connections to make ou");
+            }*/
         }
         catch (Exception exception)
         {
@@ -62,6 +62,7 @@ public class ConnectionPool
         {
             _logger.error("ConnectionPool getConnection method having error. ", exception);
         }
+
         return connection;
     }
 

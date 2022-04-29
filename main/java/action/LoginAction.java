@@ -6,8 +6,9 @@ import executor.LoginExecutor;
 import helper.Logger;
 import org.apache.struts2.dispatcher.SessionMap;
 import org.apache.struts2.interceptor.SessionAware;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import java.util.Map;
 
 public class LoginAction implements SessionAware, ModelDriven
@@ -18,8 +19,7 @@ public class LoginAction implements SessionAware, ModelDriven
 
     private static Logger _logger = new Logger();
 
-    //not thread safe
-    private String timeStamp = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss").format(Calendar.getInstance().getTime());
+    private DateTimeFormatter timeStamp = DateTimeFormat.forPattern("dd-MMMM-yyyy_HH:mm:ss");
 
     private SessionMap<String, Object> sessionMain;
 

@@ -43,7 +43,6 @@ public class DiscoveryAction implements ModelDriven
 
     public String discoveryFetchUsername()
     {
-
         try
         {
             DiscoveryExecutor discoveryExecutor= new DiscoveryExecutor();

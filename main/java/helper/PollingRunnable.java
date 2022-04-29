@@ -1,13 +1,9 @@
 package helper;
 
 import dao.Database;
-import dao.MonitorDao;
-import dao.PollingDao;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -21,19 +17,20 @@ public class PollingRunnable
 
     private Database database = new Database();
 
-    private ArrayList<Object> data = null;
+    ArrayList<Object> data = null;
 
     ExecutorService executorService = Executors.newFixedThreadPool(2*Runtime.getRuntime().availableProcessors());
 
-   /* public PollingRunnable()
+    public PollingRunnable()
     {
 
-    }*/
+    }
 
     public void pollingRunnableMethod()
     {
         try
         {
+
             String ip = null;
 
             String type = null;
@@ -48,13 +45,9 @@ public class PollingRunnable
 
             List<HashMap<String, Object>> usernamePasswordList = null;
 
-            MonitorDao monitorDao = new MonitorDao();
-
-            PollingDao pollingDao = new PollingDao();
-
             data = new ArrayList<>();
 
-            list = database.fireSelectQuery("SELECT Id, Name, IP, Type, Availability FROM Monitor", data); // make static this method
+            list = database.fireSelectQuery("SELECT Id, Name, IP, Type, Availability FROM Monitor", data);
 
             for (int i = 0; i < list.size(); i++)
             {
@@ -64,10 +57,8 @@ public class PollingRunnable
 
                 type = (String) list.get(i).get("Type");
                 
-                if (type.equals(CommonConstant.DEVICETYPESSH))
+                if (type.equals("SSH"))
                 {
-                   // stringList = pollingDao.pollingFetchUsernamePassword(id);
-
                     data = new ArrayList<>();
 
                     data.add(id);

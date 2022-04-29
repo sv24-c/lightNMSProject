@@ -1,7 +1,6 @@
 package executor;
 
 import bean.DashboardBean;
-import dao.DashboardDao;
 import dao.Database;
 import helper.Logger;
 
@@ -12,67 +11,100 @@ import java.util.*;
  */
 public class DashboardExecutor
 {
-    DashboardDao dashboardDao = null;
-
     private Database database = new Database();
-
-    private List<Integer> dashboardList = null;
-
-    private List<HashMap<String, Object>> topFiveCpuData = new ArrayList<>();
-
-    private List<HashMap<String, Object>> dashboardMatrixData;
-
-    HashMap<String, Object> hashMap = null;
-
-    private ArrayList<Object> data = null;
 
     private Logger _logger = new Logger();
 
     public boolean dashboardShowData(DashboardBean dashboardBean)
     {
-        ArrayList<Object> dashboardData = new ArrayList<>();
-
         try
         {
-            dashboardDao = new DashboardDao();
+            ArrayList<Object> data = new ArrayList<>();
 
-            data = new ArrayList<>();
+            HashMap<String, Long> hashMap = new HashMap<>();
 
-            dashboardMatrixData = new ArrayList<>();
+            HashMap<String, Float> topFiveCpuHashMap = new HashMap<>();
 
-            dashboardList = new ArrayList<>();
+            HashMap<String, Float> topFiveMemoryHashMap = new HashMap<>();
 
-            //dashboardList = dashboardDao.dashboardShowData();
+            HashMap<String, Float> topFiveDiskHashMap = new HashMap<>();
+
+            HashMap<String, Float> topFiveRTTHashMap = new HashMap<>();
+
+            List<HashMap<String, Object>> dashboardMatrixData = new ArrayList<>();
+
+            List<HashMap<String, Object>> topFiveCpuData = null;
+
+            List<HashMap<String, Object>> topFiveMemoryData = null;
+
+            List<HashMap<String, Object>> topFiveDiskData = null;
+
+            List<HashMap<String, Object>> topFiveRTTData = null;
 
             dashboardMatrixData = database.fireSelectQuery("SELECT count(*), Availability from Monitor group by Availability;", data);
 
-            //topFiveCpuData  = dashboardDao.dashboardFetchTopFiveCPUUtilizationData();
+            topFiveCpuData = database.fireSelectQuery("select max(CPU) as CPU, IP from SSHPolling where PollingTime > now() - interval 1 hour group by IP  order by CPU desc limit 5", data);
 
-            topFiveCpuData  = database.fireSelectQuery("select max(CPU) as CPU, IP from SSHPolling where PollingTime > now() - interval 1 hour group by IP  order by CPU desc limit 5", data);
+            topFiveMemoryData = database.fireSelectQuery("select max(Memory) as Memory, IP from SSHPolling where PollingTime > now() - interval 1 hour group by IP  order by Memory desc limit 5", data);
+
+            topFiveDiskData = database.fireSelectQuery("select max(Disk) as Disk, IP from SSHPolling where PollingTime > now() - interval 1 hour group by IP  order by Disk desc limit 5" , data);
+
+            topFiveRTTData = database.fireSelectQuery("select max(RTT) as RTT, IP from PingPolling where PollingTime > now() - interval 1 hour group by IP  order by RTT desc limit 5" , data);
 
             if (dashboardMatrixData != null && !dashboardMatrixData.isEmpty())
             {
-                dashboardBean.setDashboardList(dashboardMatrixData);
-
-                if (!topFiveCpuData.isEmpty())
+                for (HashMap<String, Object> foreachDashboardMatrixData : dashboardMatrixData) 
                 {
-                    dashboardBean.setTopFiveCpuData(topFiveCpuData);
-
-                    return true;
+                    hashMap.put((String) foreachDashboardMatrixData.get("Availability"), (Long) foreachDashboardMatrixData.get("count(*)"));
                 }
-
-                return true;
+                dashboardBean.setHashMap(hashMap);
             }
+
+            if (topFiveCpuData !=null && !topFiveCpuData.isEmpty())
+            {
+                for (HashMap<String, Object> foreachTopFiveCpu: topFiveCpuData) {
+
+                    topFiveCpuHashMap.put((String) foreachTopFiveCpu.get("IP"), (Float)foreachTopFiveCpu.get("CPU"));
+                }
+                dashboardBean.setTopFiveCpuHashMap(topFiveCpuHashMap);
+            }
+
+            if (topFiveMemoryData !=null && !topFiveMemoryData.isEmpty())
+            {
+                for (HashMap<String, Object> foreachTopFiveMemory : topFiveMemoryData)
+                {
+                    topFiveMemoryHashMap.put((String) foreachTopFiveMemory.get("IP"), (Float) foreachTopFiveMemory.get("Memory"));
+                }
+                dashboardBean.setTopFiveMemoryHashMap(topFiveMemoryHashMap);
+            }
+
+            if (topFiveDiskData != null && !topFiveDiskData.isEmpty())
+            {
+                for(HashMap<String, Object> foreachTopFiveDisk : topFiveDiskData)
+                {
+                    topFiveDiskHashMap.put((String) foreachTopFiveDisk.get("IP"), (Float)foreachTopFiveDisk.get("Disk"));
+                }
+                dashboardBean.setTopFiveDiskHashMap(topFiveDiskHashMap);
+            }
+
+            if (topFiveRTTData != null && !topFiveRTTData.isEmpty())
+            {
+                for (HashMap<String, Object> foreachTopFiveRTT : topFiveRTTData)
+                {
+                    topFiveRTTHashMap.put((String) foreachTopFiveRTT.get("IP"), (Float) foreachTopFiveRTT.get("RTT"));
+                }
+                dashboardBean.setTopFiveRTTHashMap(topFiveRTTHashMap);
+            }
+
+            return true;
         }
         catch (Exception exception)
         {
             exception.printStackTrace();
 
             _logger.error("DashboardExecutor dashboardExecutorFetchData method having error", exception);
-
         }
 
         return false;
     }
-
 }

@@ -2,7 +2,6 @@ package dao;
 
 import helper.ConnectionPool;
 import helper.Logger;
-
 import java.sql.*;
 import java.util.*;
 

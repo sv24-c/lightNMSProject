@@ -1,24 +1,19 @@
 package executor;
 
 import bean.MonitorBean;
+import com.sun.jmx.remote.internal.ArrayQueue;
 import dao.Database;
-import dao.MonitorDao;
-import dao.PollingDao;
 import helper.Logger;
 
+import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by smit on 20/3/22.
  */
 public class MonitorExecutor
 {
-    private MonitorDao monitorDao = new MonitorDao();
-
     private Logger _logger = new Logger();
 
     private Database database = new Database();
@@ -34,8 +29,6 @@ public class MonitorExecutor
             List<HashMap<String, Object>> list;
 
             List<MonitorBean> monitorBeanList = new ArrayList<>();
-
-            //list = monitorDao.monitorFetchAllData();
 
             list = database.fireSelectQuery("SELECT Id, Name, IP, Type, Availability FROM Monitor", data);
 
@@ -62,7 +55,6 @@ public class MonitorExecutor
         catch (Exception exception)
         {
             _logger.error("MonitorExecutor monitorFetchAllData method having error. ", exception);
-
         }
 
         return true;
@@ -75,11 +67,6 @@ public class MonitorExecutor
             data = new ArrayList<>();
 
             data.add(monitorBean.getId());
-
-            /*if(monitorDao.monitorDelete(monitorBean.getId()))
-            {
-                return true;
-            }*/
 
             if(database.fireExecuteUpdate("DELETE FROM Monitor WHERE Id = ?" , data) >=1)
             {
@@ -98,6 +85,15 @@ public class MonitorExecutor
     {
         try
         {
+            HashMap<String, Object> pingResultHashMap;
+
+            HashMap<String, Object> pingStatusHashMap;
+
+            HashMap<Float, Timestamp> pingRTTPerPollingTimeHashMap = new LinkedHashMap<>();
+
+            HashMap<String, Object> sshMatrixResultHashMap;
+
+            HashMap<String, Object> sshStatusHashMap;
 
             List<HashMap<String, Object>> pingShowResultList;
 
@@ -112,14 +108,6 @@ public class MonitorExecutor
             List<HashMap<String, Object>> hashMapList;
 
             List<HashMap<String, Object>> hashMapCpuPollingTimeList;
-
-            Map<Timestamp, Float> map;
-
-            HashMap<Timestamp, Float> mapofRtt;
-
-            PollingDao pollingDao = new PollingDao();
-
-            //ipForChart = monitorDao.monitorFetchIp(monitorBean.getId());
 
             data = new ArrayList<>();
 
@@ -138,41 +126,48 @@ public class MonitorExecutor
 
                 data.add(monitorBean.getId());
 
-                //pingShowResultList = pollingDao.pollingFetchPingData(monitorBean.getId());
-
                 pingShowResultList = database.fireSelectQuery("select SendPacket, ReceivePacket, PacketLoss, RTT, PollingTime FROM PingPolling p1 WHERE Id=? and PollingTime = (select max(PollingTime) from PingPolling p2 where p1.Id = p2.Id)" , data);
 
-                if (!pingShowResultList.isEmpty())
+                if (pingShowResultList !=null && !pingShowResultList.isEmpty())
                 {
-                    monitorBean.setMatrixList(pingShowResultList);
+                    pingResultHashMap = pingShowResultList.get(0);
+
+                    monitorBean.setPingMatrixHashMap(pingResultHashMap);
                 }
 
                 data = new ArrayList<>();
 
                 data.add(monitorBean.getId());
-
-                //pingStatusList = (pollingDao.pollingPingFetchAvailabilityData(monitorBean.getId()));
 
                 pingStatusList = database.fireSelectQuery("SELECT SUM(Status='Up') , SUM(Status='Down') from PingPolling where Id = ? and PollingTime > now() - interval 1 day;", data);
 
-                if (!pingStatusList.isEmpty())
+                if (pingShowResultList != null && !pingStatusList.isEmpty())
                 {
-                    monitorBean.setPingStatusList(pingStatusList);
+                    pingStatusHashMap = pingStatusList.get(0);
+
+                    monitorBean.setPingStatusHashMap(pingStatusHashMap);
                 }
 
                 data = new ArrayList<>();
 
                 data.add(monitorBean.getId());
 
-                //mapofRtt = pollingDao.pollingPingFetchRttData(monitorBean.getId());
-
                 hashMapList = database.fireSelectQuery("SELECT RTT, PollingTime FROM PingPolling where Id=? ORDER BY PollingTime DESC LIMIT 10;" , data);
+
+                /*if (hashMapList !=null && !hashMapList.isEmpty())
+                {
+                    for (int i = 0; i < hashMapList.size() ; i++)
+                    {
+                        pingRTTPerPollingTimeHashMap.put((Float) hashMapList.get(i).get("RTT"), (Timestamp) hashMapList.get(i).get("PollingTime"));
+                    }
+
+                    monitorBean.setPingRTTPerPollingTimeHashMap(pingRTTPerPollingTimeHashMap);
+                }*/
 
                 if (!hashMapList.isEmpty())
                 {
                     monitorBean.setRttMap(hashMapList);
                 }
-
                 return true;
             }
 
@@ -182,33 +177,31 @@ public class MonitorExecutor
 
                 data.add(monitorBean.getId());
 
-                //sshShowResultList = pollingDao.pollingFetchSSHData(monitorBean.getId());
-
                 sshShowResultList = database.fireSelectQuery("select CPU, Memory, Disk, SwapMemory, PollingTime  FROM SSHPolling s1 WHERE Id=? and PollingTime = (select max(PollingTime) from SSHPolling s2 where s1.Id = s2.Id)" , data);
 
-                if (!sshShowResultList.isEmpty())
+                if (sshShowResultList != null && !sshShowResultList.isEmpty())
                 {
-                    monitorBean.setSshMatrixList(sshShowResultList);
+                    sshMatrixResultHashMap = sshShowResultList.get(0);
+
+                    monitorBean.setSshMatrixHashMap(sshMatrixResultHashMap);
                 }
 
                 data = new ArrayList<>();
 
                 data.add(monitorBean.getId());
-
-                //sshShowStatusList = (pollingDao.pollingSSHFetchAvailabilityData(monitorBean.getId()));
 
                 sshShowStatusList = database.fireSelectQuery("SELECT SUM(Status='Up') , SUM(Status='Down') from SSHPolling where Id = ? and PollingTime > now() - interval 1 day;" , data);
 
-                if (!sshShowStatusList.isEmpty())
+                if (sshShowStatusList!=null && !sshShowStatusList.isEmpty())
                 {
-                    monitorBean.setSshStatusList(sshShowStatusList);
+                    sshStatusHashMap = sshShowStatusList.get(0);
+
+                    monitorBean.setSshStatusHashMap(sshStatusHashMap);
                 }
 
                 data = new ArrayList<>();
 
                 data.add(monitorBean.getId());
-
-                //map = pollingDao.pollingSSHFetchCpuData(monitorBean.getId());
 
                 hashMapCpuPollingTimeList = database.fireSelectQuery("SELECT CPU, PollingTime FROM SSHPolling where Id=? ORDER BY PollingTime DESC LIMIT 10;" , data);
 
@@ -226,10 +219,9 @@ public class MonitorExecutor
         }
         catch (Exception exception)
         {
-            _logger.error("MonitorDao monitorFetchChartData method having error. ", exception);
+            _logger.error("MonitorExecutor monitorFetchChartData method having error. ", exception);
         }
 
         return false;
     }
-
 }

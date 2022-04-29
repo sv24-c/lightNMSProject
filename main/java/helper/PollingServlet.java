@@ -49,6 +49,8 @@ public class PollingServlet extends HttpServlet
         {
             Thread consumerThread = new Thread(new TakeDiscoveryRunnable());
 
+            consumerThread.setName("Discovery Runnable thread");
+
             consumerThread.start();
         }
         catch (Exception exception)

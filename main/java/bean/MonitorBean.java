@@ -1,5 +1,7 @@
 package bean;
 
+import com.sun.org.apache.bcel.internal.generic.FLOAD;
+
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -13,7 +15,6 @@ public class MonitorBean
     private String type;
     private int id;
     private String availability;
-
     private String ipForChart;
     String status;
 
@@ -23,17 +24,19 @@ public class MonitorBean
 
     private List<MonitorBean> monitorBeanList = new ArrayList<>();
 
-    private List<HashMap<String, Object>> matrixList = new ArrayList<>();
+    private HashMap<String, Object> pingMatrixHashMap = new HashMap<>();
 
-    private List<HashMap<String, Object>> sshMatrixList = new ArrayList<>();
+    private HashMap<String, Object> sshMatrixHashMap = new HashMap<>();
 
-    private List<HashMap<String, Object>> pingStatusList = new ArrayList<>();
+    private HashMap<String, Object> pingStatusHashMap = new HashMap<>();
 
-    private List<HashMap<String, Object>> sshStatusList = new ArrayList<>();
+    private HashMap<String, Object> sshStatusHashMap = new HashMap<>();
 
     private List<HashMap<String, Object>> cpuMap = new ArrayList<>();
 
     private List<HashMap<String, Object>> rttMap = new ArrayList<>();
+
+    private HashMap<Float, Timestamp> pingRTTPerPollingTimeHashMap = new LinkedHashMap<>();
 
     public String getName() {
         return name;
@@ -115,36 +118,36 @@ public class MonitorBean
         this.monitorBeanList = monitorBeanList;
     }
 
-    public List<HashMap<String, Object>> getMatrixList() {
-        return matrixList;
+    public HashMap<String, Object> getPingMatrixHashMap() {
+        return pingMatrixHashMap;
     }
 
-    public void setMatrixList(List<HashMap<String, Object>> matrixList) {
-        this.matrixList = matrixList;
+    public void setPingMatrixHashMap(HashMap<String, Object> pingMatrixHashMap) {
+        this.pingMatrixHashMap = pingMatrixHashMap;
     }
 
-    public List<HashMap<String, Object>> getSshMatrixList() {
-        return sshMatrixList;
+    public HashMap<String, Object> getSshMatrixHashMap() {
+        return sshMatrixHashMap;
     }
 
-    public void setSshMatrixList(List<HashMap<String, Object>> sshMatrixList) {
-        this.sshMatrixList = sshMatrixList;
+    public void setSshMatrixHashMap(HashMap<String, Object> sshMatrixHashMap) {
+        this.sshMatrixHashMap = sshMatrixHashMap;
     }
 
-    public List<HashMap<String, Object>> getSshStatusList() {
-        return sshStatusList;
+    public HashMap<String, Object> getSshStatusHashMap() {
+        return sshStatusHashMap;
     }
 
-    public void setSshStatusList(List<HashMap<String, Object>> sshStatusList) {
-        this.sshStatusList = sshStatusList;
+    public void setSshStatusHashMap(HashMap<String, Object> sshStatusHashMap) {
+        this.sshStatusHashMap = sshStatusHashMap;
     }
 
-    public List<HashMap<String, Object>> getPingStatusList() {
-        return pingStatusList;
+    public HashMap<String, Object> getPingStatusHashMap() {
+        return pingStatusHashMap;
     }
 
-    public void setPingStatusList(List<HashMap<String, Object>> pingStatusList) {
-        this.pingStatusList = pingStatusList;
+    public void setPingStatusHashMap(HashMap<String, Object> pingStatusHashMap) {
+        this.pingStatusHashMap = pingStatusHashMap;
     }
 
     public List<HashMap<String, Object>> getCpuMap() {
@@ -153,6 +156,14 @@ public class MonitorBean
 
     public void setCpuMap(List<HashMap<String, Object>> cpuMap) {
         this.cpuMap = cpuMap;
+    }
+
+    public HashMap<Float, Timestamp> getPingRTTPerPollingTimeHashMap() {
+        return pingRTTPerPollingTimeHashMap;
+    }
+
+    public void setPingRTTPerPollingTimeHashMap(HashMap<Float, Timestamp> pingRTTPerPollingTimeHashMap) {
+        this.pingRTTPerPollingTimeHashMap = pingRTTPerPollingTimeHashMap;
     }
 
     public List<HashMap<String, Object>> getRttMap() {
@@ -169,6 +180,4 @@ public class MonitorBean
     public void setIpForChart(String ipForChart) {
         this.ipForChart = ipForChart;
     }
-
-
 }

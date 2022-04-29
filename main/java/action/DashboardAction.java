@@ -14,7 +14,7 @@ public class DashboardAction implements ModelDriven
 
     private final Logger _logger = new Logger();
 
-    public String dashboardData()//dashboardFetchData()
+    public String dashboardData()
     {
         try
         {

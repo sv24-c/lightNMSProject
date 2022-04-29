@@ -9,10 +9,15 @@ import java.util.List;
 public class DiscoveryBean
 {
     private String name;
+
     private String IP;
+
     private String type;
+
     private String username;
+
     private String password;
+
     private int id;
 
     String status;

@@ -6,7 +6,6 @@ package helper;
 
 public class MultipleDiscoveryRunnable implements Runnable
 {
-
     int blockingQueueTakenId = 0;
 
     private ServerWebSocket serverWebSocket = new ServerWebSocket();

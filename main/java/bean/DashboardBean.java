@@ -7,24 +7,53 @@ import java.util.*;
  */
 public class DashboardBean
 {
+    private HashMap<String, Long>  hashMap = new HashMap<>();
 
-    private List<HashMap<String, Object>> dashboardList = new ArrayList<>();
+    private HashMap<String, Float> topFiveCpuHashMap = new HashMap<>();
 
-    private List<HashMap<String, Object>> topFiveCpuData = new ArrayList<>();
+    private HashMap<String, Float> topFiveMemoryHashMap = new HashMap<>();
 
-    public List<HashMap<String, Object>> getDashboardList() {
-        return dashboardList;
+    private HashMap<String, Float> topFiveDiskHashMap = new HashMap<>();
+
+    private HashMap<String, Float> topFiveRTTHashMap = new HashMap<>();
+
+    public HashMap<String, Long> getHashMap() {
+        return hashMap;
     }
 
-    public void setDashboardList(List<HashMap<String, Object>> dashboardList) {
-        this.dashboardList = dashboardList;
+    public void setHashMap(HashMap<String, Long> hashMap) {
+        this.hashMap = hashMap;
     }
 
-    public List<HashMap<String, Object>> getTopFiveCpuData() {
-        return topFiveCpuData;
+    public HashMap<String, Float> getTopFiveCpuHashMap() {
+        return topFiveCpuHashMap;
     }
 
-    public void setTopFiveCpuData(List<HashMap<String, Object>> topFiveCpuData) {
-        this.topFiveCpuData = topFiveCpuData;
+    public void setTopFiveCpuHashMap(HashMap<String, Float> topFiveCpuHashMap) {
+        this.topFiveCpuHashMap = topFiveCpuHashMap;
+    }
+
+    public HashMap<String, Float> getTopFiveMemoryHashMap() {
+        return topFiveMemoryHashMap;
+    }
+
+    public void setTopFiveMemoryHashMap(HashMap<String, Float> topFiveMemoryHashMap) {
+        this.topFiveMemoryHashMap = topFiveMemoryHashMap;
+    }
+
+    public HashMap<String, Float> getTopFiveDiskHashMap() {
+        return topFiveDiskHashMap;
+    }
+
+    public void setTopFiveDiskHashMap(HashMap<String, Float> topFiveDiskHashMap) {
+        this.topFiveDiskHashMap = topFiveDiskHashMap;
+    }
+
+    public HashMap<String, Float> getTopFiveRTTHashMap() {
+        return topFiveRTTHashMap;
+    }
+
+    public void setTopFiveRTTHashMap(HashMap<String, Float> topFiveRTTHashMap) {
+        this.topFiveRTTHashMap = topFiveRTTHashMap;
     }
 }

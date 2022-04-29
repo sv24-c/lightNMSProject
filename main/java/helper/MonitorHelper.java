@@ -1,12 +1,10 @@
 package helper;
 
-import com.jcraft.jsch.ChannelExec;
-import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.*;
 import org.apache.commons.codec.binary.Base64;
+import org.joda.time.DateTime;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.List;
 
 /**
@@ -95,41 +93,96 @@ public class MonitorHelper
         return false;
     }
 
-    public boolean ssh(String username, String password, String ip)
+    public String ssh(String username, String password, String ip)
     {
         Base64 base64 = new Base64();
 
         String decryptedPassword = new String(base64.decode(password.getBytes()));
 
-        com.jcraft.jsch.Session session = null;
+        String responseString = "";
 
-        ChannelExec channel= null;
+        String resultString = null;
+
+        BufferedWriter bufferedWriter = null;
+
+        BufferedReader bufferedReader = null;
+
+        Session session = null;
+
+        Channel channel= null;
+
+        ChannelExec channelExec = null;
+
+        DateTime dateTime = new DateTime();
 
         try
         {
-            session = new JSch().getSession(username, ip, CommonConstant.SSHPORT);
+            session = new JSch().getSession(username, ip, 22);
 
-            session.setPassword(decryptedPassword);
-
-            session.setConfig("StrictHostKeyChecking", "no");
-
-            session.connect(10*1000);
-
-            channel = (ChannelExec) session.openChannel("exec");
-
-            channel.setCommand("uname");
-
-            ByteArrayOutputStream responseStream = new ByteArrayOutputStream();
-
-            channel.setOutputStream(responseStream);
-
-            channel.connect(10*1000);
-
-            String responseString = new String(responseStream.toByteArray());
-
-            if (responseString.trim().equals("Linux"))
+            if (session != null)
             {
-                return true;
+                session.setPassword(decryptedPassword);
+
+                session.setConfig("StrictHostKeyChecking", "no");
+
+                session.connect(10*1000);
+
+                if (session.isConnected())
+                {
+                    channel =  session.openChannel("shell");
+
+                    if (channel != null)
+                    {
+
+                    System.out.println("Start Time: "+dateTime.toLocalTime());
+
+
+                        channel.connect(10*1000);
+
+                        if (channel.isConnected())
+                        {
+                            bufferedWriter = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
+
+                            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+
+                            bufferedWriter.write("uname\nexit\n");
+
+                            bufferedWriter.flush();
+
+                            while ((responseString = bufferedReader.readLine()) != null)
+                            {
+                                resultString += responseString;
+                            }
+
+                            System.out.println("Start Time: "+dateTime.toLocalTime());
+
+                            if (resultString != null && resultString.trim().contains("Linux"))
+                            {
+                                return "Linux";
+                            }
+                            else
+                            {
+                                return "SSH Failed to this "+ip+" Device Type must be Linux";
+                            }
+                        }
+                        else
+                        {
+                            return "Channel is not connected";
+                        }
+                    }
+                    else
+                    {
+                        return "Channel is not Open";
+                    }
+                }
+                else
+                {
+                    return "Wrong Username or Password for SSH";
+                }
+            }
+            else
+            {
+                return "Session is null";
             }
         }
         catch (Exception exception)
@@ -138,16 +191,54 @@ public class MonitorHelper
         }
         finally
         {
-            if (channel!= null)
+            try
             {
-                channel.disconnect();
+                if (channel!= null)
+                {
+                    channel.disconnect();
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.error("Multiple Discovery time channel is not closed", exception);
             }
 
-            if (session != null)
+            try
             {
-                session.disconnect();
+                if (session != null)
+                {
+                    session.disconnect();
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.error("Multiple Discovery time Session is not closed", exception);
+            }
+
+            try
+            {
+                if (bufferedReader != null)
+                {
+                    bufferedReader.close();
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.error("Multiple Discovery time Buffered reader is not closed ", exception);
+            }
+
+            try
+            {
+                if (bufferedWriter != null)
+                {
+                    bufferedWriter.close();
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.error("Multiple Discovery time Buffered writer is not closed ", exception);
             }
         }
-        return false;
+        return "Wrong Username or Password for SSH";
     }
 }

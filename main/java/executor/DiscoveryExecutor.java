@@ -2,31 +2,33 @@ package executor;
 
 import bean.DiscoveryBean;
 import dao.Database;
-import dao.DiscoveryDao;
-import helper.CommonConstant;
 import helper.Logger;
 import helper.MonitorHelper;
+import helper.PollingPingSSH;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by smit on 12/3/22.
  */
 public class DiscoveryExecutor
 {
-    private DiscoveryDao discoveryDao = new DiscoveryDao();
-
     private Database database = new Database();
+
+    private PollingPingSSH pollingPingSSH = new PollingPingSSH();
 
     private static final Logger _logger = new Logger();
 
     ArrayList<Object> data = null;
 
+    List<String> command = new ArrayList<>();
+
     private Base64 base64 = new Base64();
+
+    static int id =0;
 
     public boolean discoveryFetchData(DiscoveryBean discoveryBean)
     {
@@ -41,8 +43,6 @@ public class DiscoveryExecutor
             discoveryBeanList = new ArrayList<>();
 
             discoveryFetchDataList = database.fireSelectQuery("SELECT Id, Name, IP, Type FROM Discovery", data);
-
-           // discoveryFetchDataList = discoveryDao.discoveryFetchData();
 
             if (discoveryFetchDataList != null && !discoveryFetchDataList.isEmpty())
             {
@@ -76,27 +76,43 @@ public class DiscoveryExecutor
 
     public boolean discoveryFetchUsername(DiscoveryBean discoveryBean)
     {
-        DiscoveryDao discoveryDao;
-
         List<HashMap<String, Object>> username = null;
+
+        List<HashMap<String, Object>> fetchData = null;
 
         try
         {
-            discoveryDao = new DiscoveryDao();
-
             data = new ArrayList<>();
+
+            id = discoveryBean.getId();
 
             data.add(discoveryBean.getId());
 
-            //username = discoveryDao.discoveryFetchUsername(discoveryBean.getId());
+            fetchData = database.fireSelectQuery("SELECT Name, IP, Type FROM Discovery WHERE Id=?", data);
 
-            username = database.fireSelectQuery("SELECT Username FROM Credential WHERE Id=?" , data);
-
-            if (!username.isEmpty())
+            if (fetchData != null && !fetchData.isEmpty())
             {
-                if(discoveryBean.setUsername((String) username.get(0).get("Username")))
+                discoveryBean.setName((String) fetchData.get(0).get("Name"));
+
+                discoveryBean.setIP((String) fetchData.get(0).get("IP"));
+
+                discoveryBean.setType((String) fetchData.get(0).get("Type"));
+
+                if (fetchData.get(0).get("Type").equals("SSH"))
                 {
-                    return true;
+                    username = database.fireSelectQuery("SELECT Username FROM Credential WHERE Id=?" , data);
+
+                    if (username!=null && !username.isEmpty())
+                    {
+                        if(discoveryBean.setUsername((String) username.get(0).get("Username")))
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        _logger.info("Username fetch data at edit time is null.");
+                    }
                 }
             }
         }
@@ -128,27 +144,42 @@ public class DiscoveryExecutor
             {
                 String encodedPassword = new String(base64.encode(discoveryBean.getPassword().getBytes()));
 
-                data = new ArrayList<>();
-
-                data.add(discoveryBean.getName());
-
-                data.add(discoveryBean.getIP());
-
-                data.add(discoveryBean.getType());
-
-                database.fireExecuteUpdate("INSERT INTO Discovery (Name, IP, Type) VALUES(?,?,?)" , data);
-
-                if (discoveryBean.getType().equals("SSH"))
+                if (discoveryBean.getType().equals("SSH") && discoveryBean.getUsername()!=null && discoveryBean.getPassword()!=null)
                 {
-                    if (new MonitorHelper().ssh(discoveryBean.getUsername(), encodedPassword, discoveryBean.getIP()))
+                    //String returnSSHResult = new MonitorHelper().ssh(discoveryBean.getUsername(), encodedPassword, discoveryBean.getIP());
+
+                    command.add("uname\nexit\n");
+
+                    String returnSSHResult = pollingPingSSH.ssh(discoveryBean.getUsername(), encodedPassword, discoveryBean.getIP(), command);
+
+                    if (returnSSHResult.contains("Linux"))
                     {
                         data = new ArrayList<>();
 
-                        data.add(discoveryBean.getId());
+                        data.add(discoveryBean.getName());
+
+                        data.add(discoveryBean.getIP());
+
+                        data.add(discoveryBean.getType());
+
+                        database.fireExecuteUpdate("INSERT INTO Discovery (Name, IP, Type) VALUES(?,?,?)" , data);
+
+                        data = new ArrayList<>();
+
+                        data.add(discoveryBean.getIP());
+
+                        data.add(discoveryBean.getType());
+
+                        List<HashMap<String, Object>> id = database.fireSelectQuery("SELECT Id from Discovery where IP = ? AND Type = ? " , data);
+
+                        data = new ArrayList<>();
+
+                        data.add(id.get(0).get("Id"));
 
                         data.add(discoveryBean.getUsername());
 
                         data.add(encodedPassword);
+
 
                         if(database.fireExecuteUpdate("INSERT INTO Credential (Id, Username, Password) VALUES(?,?,?)" , data) >=1)
                         {
@@ -159,12 +190,25 @@ public class DiscoveryExecutor
                     }
                     else
                     {
-                        discoveryBean.setStatus("Device Type must be Linux");
+                        discoveryBean.setStatus(returnSSHResult);
                     }
                 }
-                discoveryBean.setStatus(discoveryBean.getIP()+" of "+discoveryBean.getType()+" type added to Discovery");
+                else
+                {
+                    data = new ArrayList<>();
 
-                return true;
+                    data.add(discoveryBean.getName());
+
+                    data.add(discoveryBean.getIP());
+
+                    data.add(discoveryBean.getType());
+
+                    database.fireExecuteUpdate("INSERT INTO Discovery (Name, IP, Type) VALUES(?,?,?)" , data);
+
+                    discoveryBean.setStatus(discoveryBean.getIP()+" of "+discoveryBean.getType()+" type added to Discovery");
+                }
+
+                    return true;
             }
         }
         catch (Exception exception)
@@ -187,26 +231,31 @@ public class DiscoveryExecutor
 
             data.add(discoveryBean.getIP());
 
-            data.add(discoveryBean.getId());
+            data.add(id);
 
-            database.fireExecuteUpdate("UPDATE Discovery SET Name=? , IP=? where Id=? ", data);
-
-            if (discoveryBean.getType().equals("SSH"))
+            if(database.fireExecuteUpdate("UPDATE Discovery SET Name=? , IP=? where Id=? ", data) >=1)
             {
-                data = new ArrayList<>();
-
-                data.add(discoveryBean.getUsername());
-
-                data.add(encodedPassword);
-
-                data.add(discoveryBean.getId());
-
-                if(database.fireExecuteUpdate("UPDATE Credential SET Username=? , Password=? where Id=? ", data) >= 1)
+                if (discoveryBean.getType().equals("SSH"))
                 {
-                    return true;
-                }
-            }
+                    data = new ArrayList<>();
 
+                    data.add(discoveryBean.getUsername());
+
+                    data.add(encodedPassword);
+
+                    data.add(id);
+
+                    if (database.fireExecuteUpdate("UPDATE Credential SET Username=? , Password=? where Id=? ", data) >= 1)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
         }
         catch (Exception exception)
         {

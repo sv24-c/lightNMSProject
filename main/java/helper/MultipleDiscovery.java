@@ -1,9 +1,6 @@
 package helper;
 
 import dao.Database;
-import dao.DiscoveryDao;
-import dao.MonitorDao;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,13 +11,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MultipleDiscovery
 {
-    private static MonitorDao monitorDao = new MonitorDao();
+    private static LinkedBlockingQueue<Integer> linkedBlockingQueue = new LinkedBlockingQueue<>(10);
 
-    private static LinkedBlockingQueue<Integer> linkedBlockingQueue = new LinkedBlockingQueue<>();
+    static Database database = new Database();
 
-    private static Database database = new Database();
-
-    private static ArrayList<Object> data = null;
+    static ArrayList<Object> data = null;
 
     private static final Logger _logger = new Logger();
 
@@ -74,6 +69,10 @@ public class MultipleDiscovery
             String availability = "unknown";
 
             boolean pingresult;
+
+            PollingPingSSH pollingPingSSH = new PollingPingSSH();
+
+            List<String> command = new ArrayList<>();
 
             List<String> pingcommands = new ArrayList<>();
 
@@ -140,15 +139,12 @@ public class MultipleDiscovery
 
                                     data.add(availability);
 
-                                    //monitorDao.monitorInsert(blockingQueueTakenId, name, ip, type);
-
                                     database.fireExecuteUpdate("INSERT INTO Monitor (Id, Name, IP, Type, Availability) VALUES(?,?,?,?,?)" , data);
 
                                     return "Ping "+ ip + " Provision Done.";
 
-                                case "SSH":
 
-                                    DiscoveryDao discoveryDao = new DiscoveryDao();
+                                case "SSH":
 
                                     data = new ArrayList<>();
 
@@ -163,7 +159,13 @@ public class MultipleDiscovery
                                         password = (String) usernamePasswordList.get(0).get("Password");
                                     }
 
-                                    if (monitorHelper.ssh(username, password, ip))
+                                    //String returnSSHResult = monitorHelper.ssh(username, password, ip);
+
+                                    command.add("uname\nexit\n");
+
+                                    String returnSSHResult = pollingPingSSH.ssh(username, password, ip, command);
+
+                                    if (returnSSHResult.contains("Linux"))
                                     {
                                         data = new ArrayList<>();
 
@@ -183,7 +185,7 @@ public class MultipleDiscovery
                                     }
                                     else
                                     {
-                                        return "SSH Failed to this " + ip;
+                                        return returnSSHResult;
                                     }
 
                                 default:

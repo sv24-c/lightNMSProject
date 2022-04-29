@@ -40,10 +40,6 @@
             <result>login.jsp</result>
         </action>
 
-       <!-- <action name="loginProcess">
-            <result name="failure">login.jsp</result>
-        </action>-->
-
         <action name="afterLoginFetchDashboardData">
             <interceptor-ref name="loginSession"/>
             <result>/WEB-INF/index.jsp</result>
@@ -105,7 +101,7 @@
         </action>
 
         <action name="monitorShowDataProcess" class="action.MonitorAction" method="monitorFetchAllData">
-            <!--<interceptor-ref name="loginSession"/>-->
+            <interceptor-ref name="loginSession"/>
             <result name="success" type="json"/>
             <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
