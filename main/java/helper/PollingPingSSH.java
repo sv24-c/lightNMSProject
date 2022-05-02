@@ -56,11 +56,6 @@ public class PollingPingSSH implements Runnable
 
     private float disk;
 
-    public PollingPingSSH()
-    {
-
-    }
-
     public PollingPingSSH(String username, String password, String ip, int id, String type)
     {
         this.username = username;
@@ -454,59 +449,32 @@ public class PollingPingSSH implements Runnable
         {
             session = jSch.getSession(username, ip, CommonConstant.SSHPORT);
 
-            if (session != null)
+            session.setPassword(decryptedPassword);
+
+            session.setConfig("StrictHostKeyChecking", "no");
+
+            session.connect(10*1000);
+            
+            channel = (ChannelShell) session.openChannel("shell");
+
+            channel.connect(10*1000);
+            
+            bufferedWriter = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
+
+            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+
+            for (int i = 0; i< commandList.size(); i++)
             {
-                session.setPassword(decryptedPassword);
+                String command = commandList.get(i);
 
-                session.setConfig("StrictHostKeyChecking", "no");
+                bufferedWriter.write(command);
+            }
 
-                session.connect(10*1000);
+            bufferedWriter.flush();
 
-                if (session.isConnected())
-                {
-                    channel = (ChannelShell) session.openChannel("shell");
-
-                    if (channel != null)
-                    {
-                        channel.connect(10*1000);
-
-                        if (channel.isConnected())
-                        {
-                            bufferedWriter = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
-
-                            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-
-                            for (int i = 0; i< commandList.size(); i++)
-                            {
-                                String command = commandList.get(i);
-
-                                bufferedWriter.write(command);
-                            }
-
-                            bufferedWriter.flush();
-
-                            while ((resultTemp = bufferedReader.readLine()) != null)
-                            {
-                                resultString+=resultTemp;
-                            }
-
-                            if (resultString!=null)
-                            {
-                                return resultString;
-                            }
-                            else
-                            {
-                                return "SSH Failed to this "+ip+" Device Type must be Linux";
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    resultString = "Wrong Username or Password";
-
-                    return resultString;
-                }
+            while ((resultTemp = bufferedReader.readLine()) != null)
+            {
+                resultString+=resultTemp;
             }
         }
         catch (Exception exception)
@@ -563,6 +531,6 @@ public class PollingPingSSH implements Runnable
                 _logger.error("PollingPingSSH in ssh method bufferReader close having error. ", exception);
             }
         }
-        return "Wrong Username or Password";
+        return resultString;
     }
 }

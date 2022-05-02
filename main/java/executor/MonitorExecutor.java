@@ -50,7 +50,6 @@ public class MonitorExecutor
             }
 
             monitorBean.setMonitorBeanList(monitorBeanList);
-
         }
         catch (Exception exception)
         {

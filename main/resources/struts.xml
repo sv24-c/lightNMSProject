@@ -76,7 +76,7 @@
         </action>
 
         <action name="discoveryGetUsernameProcess" class="action.DiscoveryAction" method="discoveryFetchUsername">
-            <!--<interceptor-ref name="loginSession"/>-->
+            <interceptor-ref name="loginSession"/>
             <result name="success" type="json"></result>
             <result name="failure" type="json">/WEB-INF/index.jsp</result>
 

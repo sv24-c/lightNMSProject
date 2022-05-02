@@ -1,6 +1,7 @@
 package helper;
 
 import com.jcraft.jsch.*;
+import com.sun.webkit.Timer;
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
 
@@ -127,6 +128,56 @@ public class MonitorHelper
 
                 session.connect(10*1000);
 
+
+
+
+                /*if (session.isConnected())
+                {
+                    channelExec = (ChannelExec) session.openChannel("exec");
+
+
+                    System.out.println("Start Time: "+dateTime.toLocalTime());
+
+
+                    channelExec.setCommand("uname");
+
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                    channelExec.setOutputStream(byteArrayOutputStream);
+
+                    channelExec.connect(10*1000);
+
+                    if (channelExec.isConnected())
+                    {
+                        String result = new String(byteArrayOutputStream.toByteArray());
+
+
+                        System.out.println("End Time: "+dateTime.toLocalTime());
+
+
+                        if (result.trim().contains("Linux"))
+                        {
+                            return "Linux";
+                        }
+                        else
+                        {
+                            return "SSH Failed to this "+ip+" Device Type must be Linux";
+                        }
+                    }
+                    else
+                    {
+                        return "Channel is not connected";
+                    }
+                }
+                else
+                {
+                    return "Wrong Username or Password for SSH";
+                }*/
+
+
+
+
+
                 if (session.isConnected())
                 {
                     channel =  session.openChannel("shell");
@@ -179,6 +230,7 @@ public class MonitorHelper
                 {
                     return "Wrong Username or Password for SSH";
                 }
+
             }
             else
             {

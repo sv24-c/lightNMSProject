@@ -70,10 +70,6 @@ public class MultipleDiscovery
 
             boolean pingresult;
 
-            PollingPingSSH pollingPingSSH = new PollingPingSSH();
-
-            List<String> command = new ArrayList<>();
-
             List<String> pingcommands = new ArrayList<>();
 
             List<HashMap<String, Object>> usernamePasswordList;
@@ -143,8 +139,7 @@ public class MultipleDiscovery
 
                                     return "Ping "+ ip + " Provision Done.";
 
-
-                                case "SSH":
+                                case "ssh":
 
                                     data = new ArrayList<>();
 
@@ -159,13 +154,9 @@ public class MultipleDiscovery
                                         password = (String) usernamePasswordList.get(0).get("Password");
                                     }
 
-                                    //String returnSSHResult = monitorHelper.ssh(username, password, ip);
+                                    String returnSSHResult = monitorHelper.ssh(username, password, ip);
 
-                                    command.add("uname\nexit\n");
-
-                                    String returnSSHResult = pollingPingSSH.ssh(username, password, ip, command);
-
-                                    if (returnSSHResult.contains("Linux"))
+                                    if (returnSSHResult.equals("Linux"))
                                     {
                                         data = new ArrayList<>();
 
@@ -186,6 +177,8 @@ public class MultipleDiscovery
                                     else
                                     {
                                         return returnSSHResult;
+
+                                       // return "SSH Failed to this " + ip;
                                     }
 
                                 default:
