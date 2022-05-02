@@ -77,9 +77,8 @@
 
         <action name="discoveryGetUsernameProcess" class="action.DiscoveryAction" method="discoveryFetchUsername">
             <interceptor-ref name="loginSession"/>
-            <result name="success" type="json"></result>
+            <result name="success" type="json"/>
             <result name="failure" type="json">/WEB-INF/index.jsp</result>
-
         </action>
 
         <action name="discoveryUpdateProcess" class="action.DiscoveryAction" method="discoveryUpdate">
@@ -107,14 +106,14 @@
         </action>
 
         <action name="monitorDeleteProcess" class="action.MonitorAction" method="monitorDelete">
-            <!--<interceptor-ref name="loginSession"/>-->
-            <result name="success" type="json"></result>
+            <interceptor-ref name="loginSession"/>
+            <result name="success" type="json"/>
             <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
         <action name="monitorShowTableProcess" class="action.MonitorAction" method="monitorFetchChartData">
-            <!--<interceptor-ref name="loginSession"/>-->
-            <result name="success" type="json"></result>
+            <interceptor-ref name="loginSession"/>
+            <result name="success" type="json"/>
             <result name="failure" type="json">/WEB-INF/index.jsp</result>
         </action>
 
