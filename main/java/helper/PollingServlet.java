@@ -58,5 +58,4 @@ public class PollingServlet extends HttpServlet
             _logger.error("PollingServlet init method in starting thread having error. ", exception);
         }
     }
-
 }

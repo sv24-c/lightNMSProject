@@ -4,6 +4,7 @@ import bean.DiscoveryBean;
 import dao.Database;
 import helper.Logger;
 import helper.MonitorHelper;
+import helper.PollingPingSSH;
 import org.apache.commons.codec.binary.Base64;
 
 import java.util.ArrayList;
@@ -17,9 +18,13 @@ public class DiscoveryExecutor
 {
     private Database database = new Database();
 
+    private PollingPingSSH pollingPingSSH = new PollingPingSSH();
+
     private static final Logger _logger = new Logger();
 
     ArrayList<Object> data = null;
+
+    List<String> command = new ArrayList<>();
 
     private Base64 base64 = new Base64();
 
@@ -141,9 +146,12 @@ public class DiscoveryExecutor
 
                 if (discoveryBean.getType().equals("SSH") && discoveryBean.getUsername()!=null && discoveryBean.getPassword()!=null)
                 {
-                    String returnSSHResult = new MonitorHelper().ssh(discoveryBean.getUsername(), encodedPassword, discoveryBean.getIP());
 
-                    if (returnSSHResult.equals("Linux"))
+                    command.add("uname\nexit\n");
+
+                    String returnSSHResult = pollingPingSSH.ssh(discoveryBean.getUsername(), encodedPassword, discoveryBean.getIP(), command);
+
+                    if (returnSSHResult.contains("Linux"))
                     {
                         data = new ArrayList<>();
 
@@ -170,7 +178,6 @@ public class DiscoveryExecutor
                         data.add(discoveryBean.getUsername());
 
                         data.add(encodedPassword);
-
 
                         if(database.fireExecuteUpdate("INSERT INTO Credential (Id, Username, Password) VALUES(?,?,?)" , data) >=1)
                         {
@@ -258,7 +265,6 @@ public class DiscoveryExecutor
 
     public boolean discoveryDelete(DiscoveryBean discoveryBean)
     {
-
         try
         {
             data = new ArrayList<>();

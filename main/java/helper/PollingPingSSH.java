@@ -56,6 +56,11 @@ public class PollingPingSSH implements Runnable
 
     private float disk;
 
+    public PollingPingSSH()
+    {
+
+    }
+
     public PollingPingSSH(String username, String password, String ip, int id, String type)
     {
         this.username = username;
@@ -295,7 +300,6 @@ public class PollingPingSSH implements Runnable
 
     public List<Object> ping(String ip)
     {
-
         StringBuilder packetdata = new StringBuilder();
 
         String result = "";
@@ -348,8 +352,6 @@ public class PollingPingSSH implements Runnable
                         packetLoss = (int) (100 - ((Float.parseFloat(packetdata.substring((packetdata.indexOf(" received,")  - 1), packetdata.indexOf(" received,"))) / 5.0) *100));
 
                         rtt = Float.parseFloat((packetdata.substring((packetdata.indexOf("rtt ")+23), packetdata.indexOf("rtt ")+28)));
-
-                        System.out.println(rtt);
 
                         pingResultList.add(packetSend);
 
@@ -449,32 +451,59 @@ public class PollingPingSSH implements Runnable
         {
             session = jSch.getSession(username, ip, CommonConstant.SSHPORT);
 
-            session.setPassword(decryptedPassword);
-
-            session.setConfig("StrictHostKeyChecking", "no");
-
-            session.connect(10*1000);
-            
-            channel = (ChannelShell) session.openChannel("shell");
-
-            channel.connect(10*1000);
-            
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
-
-            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
-
-            for (int i = 0; i< commandList.size(); i++)
+            if (session != null)
             {
-                String command = commandList.get(i);
+                session.setPassword(decryptedPassword);
 
-                bufferedWriter.write(command);
-            }
+                session.setConfig("StrictHostKeyChecking", "no");
 
-            bufferedWriter.flush();
+                session.connect(10*1000);
 
-            while ((resultTemp = bufferedReader.readLine()) != null)
-            {
-                resultString+=resultTemp;
+                if (session.isConnected())
+                {
+                    channel = (ChannelShell) session.openChannel("shell");
+
+                    if (channel != null)
+                    {
+                        channel.connect(10*1000);
+
+                        if (channel.isConnected())
+                        {
+                            bufferedWriter = new BufferedWriter(new OutputStreamWriter(channel.getOutputStream()));
+
+                            bufferedReader = new BufferedReader(new InputStreamReader(channel.getInputStream()));
+
+                            for (int i = 0; i< commandList.size(); i++)
+                            {
+                                String command = commandList.get(i);
+
+                                bufferedWriter.write(command);
+                            }
+
+                            bufferedWriter.flush();
+
+                            while ((resultTemp = bufferedReader.readLine()) != null)
+                            {
+                                resultString+=resultTemp;
+                            }
+
+                            if (resultString!=null)
+                            {
+                                return resultString;
+                            }
+                            else
+                            {
+                                return "SSH Failed to this "+ip+" Device Type must be Linux";
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    resultString = "Wrong Username or Password";
+
+                    return resultString;
+                }
             }
         }
         catch (Exception exception)
@@ -531,6 +560,6 @@ public class PollingPingSSH implements Runnable
                 _logger.error("PollingPingSSH in ssh method bufferReader close having error. ", exception);
             }
         }
-        return resultString;
+        return "Wrong Username or Password";
     }
 }

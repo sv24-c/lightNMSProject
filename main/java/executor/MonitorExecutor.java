@@ -50,6 +50,7 @@ public class MonitorExecutor
             }
 
             monitorBean.setMonitorBeanList(monitorBeanList);
+
         }
         catch (Exception exception)
         {
@@ -140,7 +141,7 @@ public class MonitorExecutor
 
                 pingStatusList = database.fireSelectQuery("SELECT SUM(Status='Up') , SUM(Status='Down') from PingPolling where Id = ? and PollingTime > now() - interval 1 day;", data);
 
-                if (pingShowResultList != null && !pingStatusList.isEmpty())
+                if (pingStatusList != null && !pingStatusList.isEmpty())
                 {
                     pingStatusHashMap = pingStatusList.get(0);
 
@@ -189,13 +190,22 @@ public class MonitorExecutor
 
                 data.add(monitorBean.getId());
 
-                sshShowStatusList = database.fireSelectQuery("SELECT SUM(Status='Up') , SUM(Status='Down') from SSHPolling where Id = ? and PollingTime > now() - interval 1 day;" , data);
+                /*sshShowStatusList = database.fireSelectQuery("SELECT SUM(Status='Up') , SUM(Status='Down') from SSHPolling where Id = ? and PollingTime > now() - interval 1 day;" , data);
 
                 if (sshShowStatusList!=null && !sshShowStatusList.isEmpty())
                 {
                     sshStatusHashMap = sshShowStatusList.get(0);
 
                     monitorBean.setSshStatusHashMap(sshStatusHashMap);
+                }*/
+
+                pingStatusList = database.fireSelectQuery("SELECT SUM(Status='Up') , SUM(Status='Down') from SSHPolling where Id = ? and PollingTime > now() - interval 1 day;" , data);
+
+                if (pingStatusList != null && !pingStatusList.isEmpty())
+                {
+                    pingStatusHashMap = pingStatusList.get(0);
+
+                    monitorBean.setPingStatusHashMap(pingStatusHashMap);
                 }
 
                 data = new ArrayList<>();

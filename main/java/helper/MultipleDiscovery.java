@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public class MultipleDiscovery
 {
-    private static LinkedBlockingQueue<Integer> linkedBlockingQueue = new LinkedBlockingQueue<>(10);
+    private static LinkedBlockingQueue<Integer> linkedBlockingQueue = new LinkedBlockingQueue<>(15);
 
     static Database database = new Database();
 
@@ -30,8 +30,8 @@ public class MultipleDiscovery
        catch (Exception exception)
        {
            _logger.error("MultipleDiscovery multipleDiscoveryAddInQueue method having error. ", exception);
-
        }
+
        return false;
    }
 
@@ -69,6 +69,10 @@ public class MultipleDiscovery
             String availability = "unknown";
 
             boolean pingresult;
+
+            PollingPingSSH pollingPingSSH = new PollingPingSSH();
+
+            List<String> command = new ArrayList<>();
 
             List<String> pingcommands = new ArrayList<>();
 
@@ -139,7 +143,8 @@ public class MultipleDiscovery
 
                                     return "Ping "+ ip + " Provision Done.";
 
-                                case "ssh":
+
+                                case "SSH":
 
                                     data = new ArrayList<>();
 
@@ -154,9 +159,11 @@ public class MultipleDiscovery
                                         password = (String) usernamePasswordList.get(0).get("Password");
                                     }
 
-                                    String returnSSHResult = monitorHelper.ssh(username, password, ip);
+                                    command.add("uname\nexit\n");
 
-                                    if (returnSSHResult.equals("Linux"))
+                                    String returnSSHResult = pollingPingSSH.ssh(username, password, ip, command);
+
+                                    if (returnSSHResult.contains("Linux"))
                                     {
                                         data = new ArrayList<>();
 
@@ -177,8 +184,6 @@ public class MultipleDiscovery
                                     else
                                     {
                                         return returnSSHResult;
-
-                                       // return "SSH Failed to this " + ip;
                                     }
 
                                 default:

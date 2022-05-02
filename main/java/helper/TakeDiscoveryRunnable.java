@@ -16,7 +16,7 @@ public class TakeDiscoveryRunnable implements Runnable
     {
         try
         {
-            ExecutorService service = Executors.newFixedThreadPool(2*Runtime.getRuntime().availableProcessors());
+            ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
             while (true)
             {

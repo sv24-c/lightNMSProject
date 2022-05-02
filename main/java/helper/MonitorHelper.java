@@ -1,7 +1,6 @@
 package helper;
 
 import com.jcraft.jsch.*;
-import com.sun.webkit.Timer;
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
 
@@ -118,6 +117,8 @@ public class MonitorHelper
 
         try
         {
+            System.out.println("Start Time: "+dateTime.toLocalTime());
+
             session = new JSch().getSession(username, ip, 22);
 
             if (session != null)
@@ -128,16 +129,9 @@ public class MonitorHelper
 
                 session.connect(10*1000);
 
-
-
-
                 /*if (session.isConnected())
                 {
                     channelExec = (ChannelExec) session.openChannel("exec");
-
-
-                    System.out.println("Start Time: "+dateTime.toLocalTime());
-
 
                     channelExec.setCommand("uname");
 
@@ -151,12 +145,10 @@ public class MonitorHelper
                     {
                         String result = new String(byteArrayOutputStream.toByteArray());
 
-
-                        System.out.println("End Time: "+dateTime.toLocalTime());
-
-
                         if (result.trim().contains("Linux"))
                         {
+                            System.out.println("End Time: "+dateTime.toLocalTime());
+
                             return "Linux";
                         }
                         else
@@ -174,20 +166,12 @@ public class MonitorHelper
                     return "Wrong Username or Password for SSH";
                 }*/
 
-
-
-
-
                 if (session.isConnected())
                 {
                     channel =  session.openChannel("shell");
 
                     if (channel != null)
                     {
-
-                    System.out.println("Start Time: "+dateTime.toLocalTime());
-
-
                         channel.connect(10*1000);
 
                         if (channel.isConnected())
@@ -205,10 +189,10 @@ public class MonitorHelper
                                 resultString += responseString;
                             }
 
-                            System.out.println("Start Time: "+dateTime.toLocalTime());
-
                             if (resultString != null && resultString.trim().contains("Linux"))
                             {
+                                System.out.println("End Time: "+dateTime.toLocalTime());
+
                                 return "Linux";
                             }
                             else
@@ -230,6 +214,7 @@ public class MonitorHelper
                 {
                     return "Wrong Username or Password for SSH";
                 }
+
 
             }
             else

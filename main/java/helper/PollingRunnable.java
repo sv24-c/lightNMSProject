@@ -19,7 +19,7 @@ public class PollingRunnable
 
     ArrayList<Object> data = null;
 
-    ExecutorService executorService = Executors.newFixedThreadPool(2*Runtime.getRuntime().availableProcessors());
+    ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
     public PollingRunnable()
     {

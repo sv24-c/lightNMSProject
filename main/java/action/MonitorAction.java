@@ -93,7 +93,6 @@ public class MonitorAction implements ModelDriven
 
     public String monitorFetchChartData()
     {
-
         try
         {
             MonitorExecutor monitorExecutor = new MonitorExecutor();
