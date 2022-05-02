@@ -1,10 +1,6 @@
 /**
  * Created by smit on 10/3/22.
  */
-
-let username = null;
-let password = null;
-
 var login = {
 
     onload : function () {
@@ -38,14 +34,21 @@ var login = {
 
     onLogin : function () {
 
-        username = $("#userName").val();
+        let username = $("#userName").val();
 
-        password = $("#password").val();
+        let password = $("#password").val();
 
         let param = $('#loginForm').serializeArray().reduce(function(finalParam, currentValue) {
             finalParam[currentValue.name] = currentValue.value;
             return finalParam;
         }, {});
+
+        let sendData = {
+
+            userName: username,
+
+            password: password,
+        };
 
         let request = {
 
@@ -58,6 +61,7 @@ var login = {
 
         mainHelper.ajaxpost(request);
     },
+
 };
 
 var logincallback = {
@@ -70,10 +74,8 @@ var logincallback = {
         }
         else
         {
-            if (data.userName !== "" && data.password !== "")
-            {
-                toastr.error("Wrong Username or Password");
-            }
+            toastr.error("Wrong Username or Password");
         }
     }
+
 };

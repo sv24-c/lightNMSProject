@@ -63,6 +63,14 @@ var discoverymain = {
             {
                 if(type==="Ping")
                 {
+                    /*let sendData = {
+                        name: name,
+                        IP: ip,
+                        type: type,
+                        username: username,
+                        password: password,
+                    };*/
+
                     let request = {
 
                         url: "discoveryInsertProcess",
@@ -78,6 +86,14 @@ var discoverymain = {
                 {
                     if(username && password)
                     {
+                        let sendData = {
+                            name: name,
+                            IP: ip,
+                            type: type,
+                            username: username,
+                            password: password,
+                        };
+
                         let request = {
 
                             url: "discoveryInsertProcess",
@@ -192,6 +208,15 @@ var discoverymain = {
                 {
                     let id = $(that).data("id");
 
+                    let sendData = {
+                        id: id,
+                        name: name,
+                        type:type,
+                        IP: ip,
+                        username: uname,
+                        password: pass,
+                    };
+
                     let request = {
 
                         url: "discoveryUpdateProcess",
@@ -212,6 +237,15 @@ var discoverymain = {
                 if (name && ip && type)
                 {
                     let id = $(that).data("id");
+
+                    let sendData = {
+                        id: id,
+                        name: name,
+                        type:type,
+                        IP: ip,
+                        username: uname,
+                        password: pass,
+                    };
 
                     let request = {
 
@@ -319,6 +353,7 @@ var discoverymain = {
         toastr.success('Data Updated Successfully');
 
         discoverymain.back();
+
     },
 
     callbackConfirmDelete: function ()
@@ -326,6 +361,7 @@ var discoverymain = {
         toastr.info('Data Deleted Successfully');
 
         discoverymain.back();
+
     },
 
 };

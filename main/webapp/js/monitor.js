@@ -24,13 +24,13 @@ var monitormain = {
         });
     },
 
-    getChartsData: function (context)
+    getChartsData: function (that)
     {
-        let type = $(context).data("value");
+        let type = $(that).data("value");
 
-        let id = $(context).data("id");
+        let id = $(that).data("id");
 
-        let ip = $(context).parent().prev().prev().prev().text();//todo change ip
+        let ip = $(that).parent().prev().prev().prev().text();
 
         if (type === "SSH")
         {
@@ -47,18 +47,18 @@ var monitormain = {
 
     },
 
-    delete: function (context) {
+    delete: function (that) {
 
-        let id = $(context).data("id");
+        let id = $(that).data("id");
 
         $("#overview").html('<div class="col-lg-12 grid-margin stretch-card"> <div class="card"><div class="card-body">Are You Sure, To Delete this Row? <button type="button" class="btn btn-success btn-block" id="delete-monitor-btn" data-id="'+that.dataset.id+'" onclick="monitormain.confirmdelete(this)">Delete</button>  <button type="button" class="btn btn-success btn-block" id="dis-back-btn" onclick="monitormain.back()"> Back </button> </div></div></div>');
 
         toastr.warning('Data Would be Permanently deleted');
     },
 
-    confirmdelete: function (context)
+    confirmdelete: function (that)
     {
-        let id = $(context).data("id");
+        let id = $(that).data("id");
 
         let sendData = {
             id: id
@@ -98,7 +98,7 @@ var monitormain = {
 
         $.each(data.monitorBeanList, function () {
             table.row.add([this.name, this.ip, this.type, this.availability,"<button onclick='monitormain.getChartsData(this);' data-id='"+this.id+"' data-value='"+this.type+"' class='btn btn-sm btn-info' >Show</button><button onclick='monitormain.delete(this);' data-id='"+this.id+"' class='btn btn-sm btn-danger'>Delete</button>"]).draw();
-        }); // todo table column and data.
+        });
 
         //monitorHelper.loaddata(data, table);
     },
@@ -214,6 +214,8 @@ var monitormain = {
             });
 
         });
+
+        alert(list);
 
         columnChart = new CanvasJS.Chart("columnChartContainer", {
             animationEnabled: true,
