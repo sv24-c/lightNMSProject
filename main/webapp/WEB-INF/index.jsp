@@ -4,17 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <title>Welcome</title>
+    <title>Welcome to LNMS</title>
 
     <link rel="stylesheet" href="/css/vertical-layout-light/style.css">
     <link rel="stylesheet" href="/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="/css/index-main-style.css">
     <link rel="stylesheet" href="/css/toastr.min.css">
-
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css">
 
     <script type="text/javascript" src="/js/jQueryFile.js"></script>
-
     <script type="text/javascript" src="/js/loginPage.js"></script>
     <script type="text/javascript" src="/js/main.js"></script>
     <script type="text/javascript" src="/js/discovery.js"></script>
