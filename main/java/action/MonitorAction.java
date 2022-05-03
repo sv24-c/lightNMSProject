@@ -27,16 +27,11 @@ public class MonitorAction implements ModelDriven
 
                 return "success";
             }
-
             else
             {
                 monitorBean.setStatus("Not Added to queue");
-
-                return "failure";
             }
-
         }
-
         catch (Exception exception)
         {
             _logger.error("MonitorAction provision method having error. ", exception);
@@ -56,11 +51,6 @@ public class MonitorAction implements ModelDriven
             {
                 return "success";
             }
-            else
-            {
-                return "failure";
-            }
-
         }
 
         catch (Exception exception)
@@ -101,10 +91,7 @@ public class MonitorAction implements ModelDriven
             {
                 return "success";
             }
-            else
-            {
-                return "failure";
-            }
+
         }
         catch (Exception exception)
         {

@@ -97,7 +97,7 @@ public class MonitorHelper
     {
         Base64 base64 = new Base64();
 
-        String decryptedPassword = new String(base64.decode(password.getBytes()));
+        String decodingPassword = new String(base64.decode(password.getBytes()));
 
         String responseString = "";
 
@@ -123,7 +123,7 @@ public class MonitorHelper
 
             if (session != null)
             {
-                session.setPassword(decryptedPassword);
+                session.setPassword(decodingPassword);
 
                 session.setConfig("StrictHostKeyChecking", "no");
 

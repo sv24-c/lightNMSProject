@@ -24,10 +24,6 @@ public class DashboardAction implements ModelDriven
             {
                 return "success";
             }
-            else
-            {
-                return "failure";
-            }
         }
         catch (Exception exception)
         {

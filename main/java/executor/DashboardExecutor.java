@@ -23,15 +23,15 @@ public class DashboardExecutor
 
             HashMap<String, Long> hashMap = new HashMap<>();
 
-            HashMap<String, Float> topFiveCpuHashMap = new HashMap<>();
+            HashMap<String, Float> topFiveCpuHashMap = new LinkedHashMap<>();
 
-            HashMap<String, Float> topFiveMemoryHashMap = new HashMap<>();
+            HashMap<String, Float> topFiveMemoryHashMap = new LinkedHashMap<>();
 
-            HashMap<String, Float> topFiveDiskHashMap = new HashMap<>();
+            HashMap<String, Float> topFiveDiskHashMap = new LinkedHashMap<>();
 
-            HashMap<String, Float> topFiveRTTHashMap = new HashMap<>();
+            HashMap<String, Float> topFiveRTTHashMap = new LinkedHashMap<>();
 
-            List<HashMap<String, Object>> dashboardMatrixData = new ArrayList<>();
+            List<HashMap<String, Object>> dashboardMatrixData;
 
             List<HashMap<String, Object>> topFiveCpuData = null;
 
@@ -104,7 +104,6 @@ public class DashboardExecutor
 
             _logger.error("DashboardExecutor dashboardExecutorFetchData method having error", exception);
         }
-
         return false;
     }
 }

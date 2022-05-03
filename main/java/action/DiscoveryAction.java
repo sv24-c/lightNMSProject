@@ -26,13 +26,7 @@ public class DiscoveryAction implements ModelDriven
             {
                 return "success";
             }
-            else
-            {
-                return "failure";
-            }
-
         }
-
         catch (Exception exception)
         {
             _logger.error("DiscoveryActionFetchData discoveryActionFetchData method having error. ", exception);
@@ -51,17 +45,10 @@ public class DiscoveryAction implements ModelDriven
             {
                 return "success";
             }
-            else
-            {
-                return "failure";
-            }
-
         }
-
         catch (Exception exception)
         {
             _logger.error("DiscoveryActionFetchUsernameData discoveryActionFetchUsernameData method having error. ", exception);
-
         }
 
         return "failure";
@@ -78,16 +65,10 @@ public class DiscoveryAction implements ModelDriven
 
                 return "success";
             }
-
-            else
-            {
-                return "failure";
-            }
         }
         catch (Exception exception)
         {
             _logger.error("DiscoveryActionInsert discoveryActionInsertInDatabase method having error. ", exception);
-
         }
 
         return "failure";
@@ -102,10 +83,6 @@ public class DiscoveryAction implements ModelDriven
             if(discoveryExecutor.discoveryUpdate(discoveryBean))
             {
                 return "success";
-            }
-            else
-            {
-                return "failure";
             }
         }
         catch (Exception exception)
@@ -126,17 +103,12 @@ public class DiscoveryAction implements ModelDriven
             {
                 return "success";
             }
-            else
-            {
-                return "failure";
-            }
         }
         catch (Exception exception)
         {
             _logger.error("DiscoveryAction discoveryDelete method having error. ", exception);
 
         }
-
         return "failure";
     }
 

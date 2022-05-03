@@ -3,7 +3,6 @@ package helper;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.util.Arrays;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -21,11 +20,11 @@ public class ConnectionPool
         {
             Connection connection = null;
 
-            linkedBlockingQueue = new LinkedBlockingQueue<>(15);
+            linkedBlockingQueue = new LinkedBlockingQueue<>(10);
 
             Class.forName("com.mysql.cj.jdbc.Driver");
 
-            for (int i = 0; i < 15 ; i++)
+            for (int i = 0; i < 10 ; i++)
             {
                 connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/lightNMS?characterEncoding=utf8", "root", "Mind@123");
 
